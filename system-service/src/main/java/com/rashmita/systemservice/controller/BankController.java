@@ -1,8 +1,9 @@
 package com.rashmita.systemservice.controller;
-
-import com.rashmita.systemservice.constants.ApiConstants;
-import com.rashmita.systemservice.exception.NotFoundException;
-import com.rashmita.systemservice.model.*;
+import com.rashmita.common.constants.ApiConstants;
+import com.rashmita.common.exception.NotFoundException;
+import com.rashmita.common.model.*;
+import com.rashmita.systemservice.model.BankRequest;
+import com.rashmita.systemservice.model.BankUpdateRequest;
 import com.rashmita.systemservice.service.BankService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import static com.rashmita.systemservice.constants.ApiConstants.*;
-import static com.rashmita.systemservice.constants.RolesConstants.*;
-
+import static com.rashmita.common.constants.ApiConstants.*;
+import static com.rashmita.common.constants.RolesConstants.VIEW_BANK;
 
 /**
  * rashmita subedi

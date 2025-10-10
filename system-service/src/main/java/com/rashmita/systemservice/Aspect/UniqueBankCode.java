@@ -1,5 +1,4 @@
 package com.rashmita.systemservice.Aspect;
-import com.rashmita.systemservice.validation.UniqueBankCodeValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

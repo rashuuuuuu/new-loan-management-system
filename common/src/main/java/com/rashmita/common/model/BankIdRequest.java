@@ -1,5 +1,4 @@
-package com.rashmita.systemservice.model;
-
+package com.rashmita.common.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,10 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BankUpdateRequest {
-
+public class BankIdRequest {
     private String bankCode;
-    private BankAdmin bankAdmin;
-    private Boolean isActive;
-
 }

@@ -1,6 +1,7 @@
 package com.rashmita.systemservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rashmita.common.model.AccessGroupModel;
 import com.rashmita.systemservice.Aspect.UniqueBankCode;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -42,7 +43,5 @@ public class BankRequest {
         private String adminName;
         private String email;
         private String password;
-
-
     }
 }

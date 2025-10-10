@@ -1,4 +1,5 @@
 package com.rashmita.systemservice.entity;
+import com.rashmita.common.entity.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

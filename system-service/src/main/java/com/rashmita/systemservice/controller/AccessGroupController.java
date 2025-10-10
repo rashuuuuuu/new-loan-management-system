@@ -1,19 +1,21 @@
 package com.rashmita.systemservice.controller;
-import com.rashmita.systemservice.constants.ApiConstants;
-import com.rashmita.systemservice.model.*;
-import com.rashmita.systemservice.service.AccessGroupService;
+import com.rashmita.common.constants.ApiConstants;
+import com.rashmita.common.model.*;
+import com.rashmita.common.service.AccessGroupService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 @RestController
 @RequestMapping(ApiConstants.ACCESS_GROUP)
-@RequiredArgsConstructor
 public class AccessGroupController {
     private final AccessGroupService accessGroupService;
 
+    public AccessGroupController(AccessGroupService accessGroupService) {
+        this.accessGroupService = accessGroupService;
+    }
+
     @PostMapping(ApiConstants.CREATE)
-    public ServerResponse addAccessGroup(@RequestBody @Valid CreateAccessGroupModel createAccessGroupModel,
+    public ServerResponse<?> addAccessGroup(@RequestBody @Valid CreateAccessGroupModel createAccessGroupModel,
                                          Principal connectedUser) {
         return accessGroupService.createAccessGroup(createAccessGroupModel, connectedUser);
     }

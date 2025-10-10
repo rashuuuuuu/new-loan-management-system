@@ -1,12 +1,14 @@
 package com.rashmita.systemservice.mapper;
-
-import com.rashmita.systemservice.constants.StatusConstants;
-import com.rashmita.systemservice.entity.Bank;
-import com.rashmita.systemservice.entity.BankAdmin;
-import com.rashmita.systemservice.entity.Status;
-import com.rashmita.systemservice.entity.User;
-import com.rashmita.systemservice.exception.NotFoundException;
-import com.rashmita.systemservice.model.*;
+import com.rashmita.common.constants.StatusConstants;
+import com.rashmita.common.entity.Bank;
+import com.rashmita.common.entity.BankAdmin;
+import com.rashmita.common.entity.Status;
+import com.rashmita.common.entity.User;
+import com.rashmita.common.exception.NotFoundException;
+import com.rashmita.common.model.*;
+import com.rashmita.common.repository.*;
+import com.rashmita.systemservice.model.BankRequest;
+import com.rashmita.systemservice.model.BankUpdateRequest;
 import com.rashmita.systemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,5 @@
 package com.rashmita.common.model;
+
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

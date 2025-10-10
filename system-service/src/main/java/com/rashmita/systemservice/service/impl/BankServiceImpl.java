@@ -1,9 +1,11 @@
 package com.rashmita.systemservice.service.impl;
-import com.rashmita.systemservice.entity.Bank;
-import com.rashmita.systemservice.exception.NotFoundException;
+import com.rashmita.common.entity.Bank;
+import com.rashmita.common.exception.NotFoundException;
+import com.rashmita.common.model.*;
+import com.rashmita.common.repository.BankRepository;
 import com.rashmita.systemservice.mapper.BankMapper;
-import com.rashmita.systemservice.model.*;
-import com.rashmita.systemservice.repository.BankRepository;
+import com.rashmita.systemservice.model.BankRequest;
+import com.rashmita.systemservice.model.BankUpdateRequest;
 import com.rashmita.systemservice.service.BankService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class BankServiceImpl  implements BankService {
     }
 
     @Override
-    public ServerResponse createBank(BankRequest bankRequestDto) throws NotFoundException {
+    public ServerResponse<?> createBank(BankRequest bankRequestDto) throws NotFoundException {
         bankMapper.saveBankDetails(bankRequestDto);
         return ResponseUtility.getSuccessfulServerResponse("Bank Created Successfully");
     }

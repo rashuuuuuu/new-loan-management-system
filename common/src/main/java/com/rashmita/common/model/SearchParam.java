@@ -1,5 +1,4 @@
 package com.rashmita.common.model;
-
 import lombok.Getter;
 import lombok.Setter;
 

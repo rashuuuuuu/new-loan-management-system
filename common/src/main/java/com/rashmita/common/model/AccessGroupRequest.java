@@ -1,5 +1,4 @@
 package com.rashmita.common.model;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

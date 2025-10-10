@@ -1,4 +1,5 @@
 package com.rashmita.common.entity;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -20,8 +21,8 @@ public class Bank extends AbstractEntity {
     private Date establishedDate;
     @Column(name = "isActive")
     private Boolean isActive;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "bank_admin", referencedColumnName = "id")
+    @JoinColumn(name = "bank_admin", referencedColumnName = "id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BankAdmin bankAdmin;
     @Column(name = "created_date")
     private String createdDate;
@@ -30,5 +31,6 @@ public class Bank extends AbstractEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "status_id", referencedColumnName = "id")
     private Status status;
-
+    @OneToOne(mappedBy = "bank", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private LoanConfiguration loanConfiguration;
 }

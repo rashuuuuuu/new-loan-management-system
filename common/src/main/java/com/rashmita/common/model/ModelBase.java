@@ -1,7 +1,10 @@
 package com.rashmita.common.model;
 
-import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
+import java.io.Serializable;
+
 
 public class ModelBase implements Serializable {
 

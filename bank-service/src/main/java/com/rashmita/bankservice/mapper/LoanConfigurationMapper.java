@@ -1,6 +1,6 @@
 package com.rashmita.bankservice.mapper;
 
-import com.rashmita.bankservice.entity.LoanConfiguration;
+import com.rashmita.common.entity.LoanConfiguration;
 import com.rashmita.bankservice.model.LoanConfigIdRequest;
 import com.rashmita.bankservice.model.LoanConfigurationRequest;
 import com.rashmita.bankservice.model.LoanConfigurationResponse;
@@ -8,6 +8,7 @@ import com.rashmita.bankservice.model.LoanUpdateRequest;
 import com.rashmita.bankservice.repository.LoanConfigurationRepository;
 import com.rashmita.common.constants.StatusConstants;
 import com.rashmita.common.exception.NotFoundException;
+import com.rashmita.common.repository.BankRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,7 +28,7 @@ public class LoanConfigurationMapper {
     @Autowired
     private final ModelMapper modelMapper;
     private final LoanConfigurationRepository loanConfigurationRepository;
-
+    private final BankRepository bankRepository;
     public LoanConfiguration saveLoanConfiguration(LoanConfigurationRequest loanConfigurationRequest) {
         LoanConfiguration loanConfiguration = new LoanConfiguration();
         loanConfiguration.setMaximumLoanPeriod(loanConfigurationRequest.getMaximumLoanPeriod());
@@ -40,9 +41,9 @@ public class LoanConfigurationMapper {
         loanConfiguration.setStatus(StatusConstants.CREATED);
         loanConfiguration.setLateFeeCharge(loanConfigurationRequest.getLateFeeCharge());
         loanConfiguration.setLoanAdministrationFeeRate(loanConfigurationRequest.getLoanAdministrationFeeRate());
+        loanConfiguration.setBank(bankRepository.getByBankCode(loanConfigurationRequest.getBankIdRequest().getBankCode()));
         return loanConfigurationRepository.save(loanConfiguration);
     }
-
 
     public LoanConfiguration updateLoanConfiguration(LoanUpdateRequest loanUpdateRequest) {
         Long id = loanUpdateRequest.getId();

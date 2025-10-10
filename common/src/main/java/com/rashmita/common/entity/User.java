@@ -1,4 +1,5 @@
 package com.rashmita.common.entity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

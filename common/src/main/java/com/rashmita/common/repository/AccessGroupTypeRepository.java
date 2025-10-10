@@ -20,4 +20,5 @@ public interface AccessGroupTypeRepository extends JpaRepository<AccessGroupType
     AccessGroupType findAccessGroupTypeByName(@Param("name") String name);
 
 
+    boolean existsByName(String name);
 }

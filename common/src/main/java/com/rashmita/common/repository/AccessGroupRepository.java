@@ -20,4 +20,6 @@ public interface AccessGroupRepository extends JpaRepository<AccessGroup, Long> 
     Optional<AccessGroup> findByName(String name);
 
     AccessGroup getByName(String name);
+
+    boolean existsByName(String name);
 }

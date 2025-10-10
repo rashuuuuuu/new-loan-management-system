@@ -1,4 +1,5 @@
 package com.rashmita.bankservice.model;
+import com.rashmita.common.model.BankIdRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,4 +17,5 @@ public class LoanConfigurationRequest {
     private Double loanAdministrationFeeAmount;
     private int defaultingPeriod;
     private int maximumLoanPeriod;
+    private BankIdRequest bankIdRequest;
 }

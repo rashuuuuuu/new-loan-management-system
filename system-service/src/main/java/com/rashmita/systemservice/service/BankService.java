@@ -1,8 +1,9 @@
 package com.rashmita.systemservice.service;
 
-import com.rashmita.systemservice.exception.NotFoundException;
-import com.rashmita.systemservice.model.*;
-
+import com.rashmita.common.exception.NotFoundException;
+import com.rashmita.common.model.*;
+import com.rashmita.systemservice.model.BankRequest;
+import com.rashmita.systemservice.model.BankUpdateRequest;
 import org.springframework.data.domain.Pageable;
 
 public interface BankService {

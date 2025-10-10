@@ -1,5 +1,4 @@
 package com.rashmita.common.entity;
-
 import jakarta.persistence.*;
 import lombok.*;
 

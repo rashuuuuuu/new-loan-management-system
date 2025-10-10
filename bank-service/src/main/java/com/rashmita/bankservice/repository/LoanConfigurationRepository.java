@@ -1,6 +1,6 @@
 package com.rashmita.bankservice.repository;
 
-import com.rashmita.bankservice.entity.LoanConfiguration;
+import com.rashmita.common.entity.LoanConfiguration;
 
 import com.rashmita.bankservice.model.LoanConfigIdRequest;
 import org.springframework.data.jpa.repository.JpaRepository;

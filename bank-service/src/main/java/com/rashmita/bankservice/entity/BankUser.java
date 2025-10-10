@@ -1,7 +1,5 @@
 package com.rashmita.bankservice.entity;
 
-
-import com.rashmita.common.constants.StatusConstants;
 import com.rashmita.common.entity.AbstractEntity;
 import com.rashmita.common.entity.AccessGroup;
 import com.rashmita.common.entity.Status;

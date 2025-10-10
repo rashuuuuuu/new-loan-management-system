@@ -16,4 +16,5 @@ public interface RoleRepository extends CrudRepository<Roles, Long> {
     List<Roles> getAllRoles();
     List<Roles> findByNameIn(List<String> names);
 
+    boolean existsByName(String name);
 }
