@@ -1,40 +1,33 @@
 package com.rashmita.systemservice.entity;
-
-import com.rashmita.systemservice.constants.RoleEnum;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Date;
+import java.util.List;
 
-@Data
-@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
+@Entity
 @Table(name = "roles")
 public class Roles extends AbstractEntity {
-    @Column(unique = true, nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RoleEnum name;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(nullable = false)
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "created_at")
-    private Date createdAt;
+    @JoinColumn(name = "parent_role", referencedColumnName = "id")
+    @ManyToOne
+    private Roles parentRole;
 
-    @Column(name = "updated_at")
-    private Date updatedAt;
+    @Column(name = "parent_name")
+    private String parentName;
 
-    @Version
-    @Column(name = "version")
-    private Integer version;
-
-    @Column(name = "permission",unique = true)
+    @Column(name = "permission")
     private String permission;
 
-    public String toArray(String[] strings) {
-        return String.join(",", strings);
-    }
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<AccessGroupTypeRoleMap> groupTypeMappings;
+
 }

@@ -1,7 +1,6 @@
 package com.rashmita.systemservice.security.services;
 import com.rashmita.systemservice.entity.User;
 import com.rashmita.systemservice.repository.UserRepository;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,16 +21,15 @@ public class UserService {
 
         return users;
     }
-
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        if (user != null) {
-            return (User) org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRole().toArray(new String[0]))
-                    .build();
-        }
-        throw new UsernameNotFoundException("User not found with username: " + username);
-    }
+//    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+//        User user = userRepository.findByUsername(username);
+//        if (user != null) {
+//            return (User) org.springframework.security.core.userdetails.User.builder()
+//                    .username(user.getUsername())
+//                    .password(user.getPassword())
+//                    .roles(user.getRole().toArray(new String[0]))
+//                    .build();
+//        }
+//        throw new UsernameNotFoundException("User not found with username: " + username);
+//    }
 }

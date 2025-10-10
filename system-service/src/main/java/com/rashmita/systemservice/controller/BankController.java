@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static com.rashmita.systemservice.constants.ApiConstants.*;
+import static com.rashmita.systemservice.constants.RolesConstants.*;
 
 
 /**
@@ -20,36 +21,40 @@ import static com.rashmita.systemservice.constants.ApiConstants.*;
  */
 @RestController
 @RequestMapping(ApiConstants.BANK)
-@PreAuthorize("hasAnyRole('SUPERADMIN')")
 @RequiredArgsConstructor
 public class BankController {
     private final BankService bankService;
+    @PreAuthorize("hasAuthority('CREATE_BANK')")
     @PostMapping(CREATE)
-    public ServerResponse<?> createBank(@Valid @RequestBody BankRequest bankRequest) {
+    public ServerResponse<?> createBank(@Valid @RequestBody BankRequest bankRequest) throws NotFoundException {
         return bankService.createBank(bankRequest);
     }
 
     @PostMapping(UPDATE)
-    public ServerResponse<?> updateBank(@Valid @RequestBody BankUpdateRequest bankUpdateRequest) {
+    @PreAuthorize("hasAuthority('MODIFY_BANK')")
+    public ServerResponse<?> updateBank(@Valid @RequestBody BankUpdateRequest bankUpdateRequest) throws NotFoundException {
         return bankService.updateBank(bankUpdateRequest);
     }
 
     @PostMapping(DELETE)
-    public ServerResponse<?> deleteBank(@Valid @RequestBody BankCodeRequest bankCodeRequest) {
+    @PreAuthorize("hasAuthority('DELETE_BANK')")
+    public ServerResponse<?> deleteBank(@Valid @RequestBody BankCodeRequest bankCodeRequest) throws NotFoundException {
         return bankService.deleteBank(bankCodeRequest);
     }
 
-    @GetMapping(GET+BY+ID)
+    @GetMapping(GET + BY + ID)
     public ServerResponse<?> getBankById(@Valid @RequestBody BankIdRequest bankIdRequest) throws NotFoundException {
         return bankService.getBankById(bankIdRequest);
     }
 
-    @GetMapping(GET+BY+NAME)
+    @GetMapping(GET + BY + NAME)
+    @PreAuthorize(VIEW_BANK)
     public ServerResponse<?> getByBankCode(@Valid @RequestBody BankCodeRequest bankCodeRequest) throws NotFoundException {
         return bankService.getByBankCode(bankCodeRequest);
     }
 
-    @GetMapping(GET+ALL)
+    @GetMapping(GET + ALL)
+    @PreAuthorize("hasAuthority('VIEW_BANK')")
     public ServerResponse<?> getAllBanks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -57,7 +62,8 @@ public class BankController {
         Pageable pageable = PageRequest.of(page, size);
         return bankService.getAllBanks(pageable);
     }
-    @GetMapping(SORTING+DECENDING+DATE)
+
+    @GetMapping(SORTING + DECENDING + DATE)
     public ServerResponse<?> getAllBanks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

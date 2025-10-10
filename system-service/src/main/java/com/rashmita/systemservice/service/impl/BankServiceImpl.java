@@ -1,5 +1,4 @@
 package com.rashmita.systemservice.service.impl;
-
 import com.rashmita.systemservice.entity.Bank;
 import com.rashmita.systemservice.exception.NotFoundException;
 import com.rashmita.systemservice.mapper.BankMapper;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,19 +29,19 @@ public class BankServiceImpl  implements BankService {
     }
 
     @Override
-    public ServerResponse createBank(BankRequest bankRequestDto) {
+    public ServerResponse createBank(BankRequest bankRequestDto) throws NotFoundException {
         bankMapper.saveBankDetails(bankRequestDto);
         return ResponseUtility.getSuccessfulServerResponse("Bank Created Successfully");
     }
 
     @Override
-    public ServerResponse updateBank(BankUpdateRequest bankUpdateRequest) {
+    public ServerResponse updateBank(BankUpdateRequest bankUpdateRequest) throws NotFoundException {
         bankMapper.updateBankDetails(bankUpdateRequest);
         return ResponseUtility.getSuccessfulServerResponse("Bank Updated Successfully");
     }
 
     @Override
-    public ServerResponse deleteBank(BankCodeRequest bankCodeRequest) {
+    public ServerResponse deleteBank(BankCodeRequest bankCodeRequest) throws NotFoundException {
         bankMapper.deleteBank(bankCodeRequest);
         return ResponseUtility.getSuccessfulServerResponse("Bank Deleted Successfully");
     }

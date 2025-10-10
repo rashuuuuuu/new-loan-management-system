@@ -1,0 +1,26 @@
+data-init:
+  accessGroupsList:
+    -
+      name: SUPER_ADMIN
+      description: Super Admin
+      isSuperAdminGroup: true
+      status:
+        name: CREATED
+      accessGroupType:
+        name: SYSTEM
+    -
+      name: SYSTEM_ADMIN
+      description: System Admin
+      isSuperAdminGroup: false
+      status:
+        name: CREATED
+      accessGroupType:
+        name: SYSTEM
+    -
+      name: BANK_ADMIN
+      description: Bank Admin
+      isSuperAdminGroup: false
+      status:
+        name: CREATED
+      accessGroupType:
+        name: BANK

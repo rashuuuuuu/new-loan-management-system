@@ -1,0 +1,78 @@
+data-init:
+  accessGroupTypeRoleMapList:
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Banks
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Create Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: View Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Modify Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Delete Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Block Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: UnBlock Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Reopen Bank
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Unlock Bank Controller
+      isActive: true
+    -
+      accessGroupTypeName: SYSTEM
+      accessGroupName: SUPER_ADMIN
+      roleName: Reset Password Bank Controller
+      isActive: true
+    # ... continue for other SYSTEM roles ...
+    -
+      accessGroupTypeName: BANK
+      accessGroupName: BANK_ADMIN
+      roleName: Bank Users
+      isActive: true
+    -
+      accessGroupTypeName: BANK
+      accessGroupName: BANK_ADMIN
+      roleName: Create Bank User
+      isActive: true
+    -
+      accessGroupTypeName: BANK
+      accessGroupName: BANK_ADMIN
+      roleName: Modify Bank User
+      isActive: true
+    -
+      accessGroupTypeName: BANK
+      accessGroupName: BANK_ADMIN
+      roleName: View Bank User
+      isActive: true
+    -
+      accessGroupTypeName: BANK
+      accessGroupName: BANK_ADMIN
+      roleName: Delete Access Group
+      isActive: true

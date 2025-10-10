@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,22 +12,22 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Table(name = "users")
 @Entity
 @RequiredArgsConstructor
 @Getter
 @Setter
-
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name="fullname")
     private String fullName;
 
     @Column(name="username")
@@ -38,19 +39,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
-    private Roles role;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "status_id", referencedColumnName = "id")
-    private Status status;
-
-    public User setRole(Roles role) {
-        this.role = role;
-        return this;
-    }
-
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -59,13 +47,28 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @JoinColumn(name = "status_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Status status;
+
+    @JoinColumn(name = "access_group", nullable = false, referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private AccessGroup accessGroup;
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
-
-        return List.of(authority);
+        if (accessGroup != null && accessGroup.getRoleGroupMaps() != null) {
+            Hibernate.initialize(accessGroup.getRoleGroupMaps());
+            return accessGroup.getRoleGroupMaps().stream()
+                    .filter(AccessGroupTypeRoleMap::getIsActive)
+                    .map(AccessGroupTypeRoleMap::getRole)
+                    .map(role -> new SimpleGrantedAuthority(role.getPermission()))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
-
+    @Override
     public String getPassword() {
         return password;
     }
@@ -74,7 +77,6 @@ public class User implements UserDetails {
     public String getUsername() {
         return email;
     }
-
 
     @Override
     public boolean isAccountNonExpired() {
@@ -95,6 +97,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
-
 }

@@ -1,0 +1,131 @@
+data-init:
+  rolesList:
+    - name: Root
+      description: Root
+      parentName: NONE
+      permission: ROOT
+
+    - name: Banks
+      description: Banks
+      parentName: Root
+      permission: BANK
+
+    - name: Create Bank
+      description: Create Bank
+      parentName: Banks
+      permission: CREATE_BANK
+
+    - name: View Bank
+      description: View Bank
+      parentName: Banks
+      permission: VIEW_BANK
+
+    - name: Modify Bank
+      description: Modify Bank
+      parentName: Banks
+      permission: MODIFY_BANK
+
+    - name: Delete Bank
+      description: Delete Bank
+      parentName: Banks
+      permission: DELETE_BANK
+
+    - name: Block Bank
+      description: Block Bank
+      parentName: Banks
+      permission: BLOCK_BANK
+
+    - name: UnBlock Bank
+      description: UnBlock Bank
+      parentName: Banks
+      permission: UNBLOCK_BANK
+
+    - name: Reopen Bank
+      description: Reopen Bank
+      parentName: Banks
+      permission: REOPEN_BANK
+
+    - name: Customers
+      description: Customers
+      parentName: Root
+      permission: CUSTOMER
+
+    - name: View Customer
+      description: View Customer
+      parentName: Customers
+      permission: VIEW_CUSTOMER
+
+    - name: Delete Customer
+      description: Delete Customer
+      parentName: Customers
+      permission: DELETE_CUSTOMER
+
+    - name: Block Customer
+      description: Block Customer
+      parentName: Customers
+      permission: BLOCK_CUSTOMER
+
+    - name: UnBlock Customer
+      description: UnBlock Customer
+      parentName: Customers
+      permission: UNBLOCK_CUSTOMER
+
+    - name: Reopen Customer
+      description: Reopen Customer
+      parentName: Customers
+      permission: REOPEN_CUSTOMER
+
+    - name: Unlock Customer
+      description: Unlock Customer
+      parentName: Customers
+      permission: UNLOCK_CUSTOMER
+
+    - name: Reset Password Customer
+      description: Reset Password Customer
+      parentName: Customers
+      permission: RESET_PASSWORD_CUSTOMER
+
+    - name: System Users
+      description: System Users
+      parentName: Root
+      permission: SYSTEM_USER
+
+    - name: Create System User
+      description: Create System User
+      parentName: System Users
+      permission: CREATE_SYSTEM_USER
+
+    - name: Modify System User
+      description: Modify System User
+      parentName: System Users
+      permission: MODIFY_SYSTEM_USER
+
+    - name: View System User
+      description: View System User
+      parentName: System Users
+      permission: VIEW_SYSTEM_USER
+
+    - name: Reset Two Factor Authentication System User
+      description: Reset Two Factor Authentication System User
+      parentName: System Users
+      permission: RESET_TWO_FACTOR_AUTHENTICATION_SYSTEM_USER
+
+    - name: Bank Users
+      description: Bank Users
+      parentName: Root
+      permission: BANK_USER
+
+    - name: Create Bank User
+      description: Create Bank User
+      parentName: Bank Users
+      permission: CREATE_BANK_USER
+
+    - name: View Bank User
+      description: View Bank User
+      parentName: Bank Users
+      permission: VIEW_BANK_USER
+
+    - name: Modify Bank User
+      description: Modify Bank User
+      parentName: Bank Users
+      permission: MODIFY_BANK_USER

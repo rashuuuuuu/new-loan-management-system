@@ -35,14 +35,14 @@ public class BankRequest {
     @NotNull(message = "fill the bankAdmin details")
     private BankAdminRequest bankAdminRequest;
 
-
+    @NotNull(message = "Access Group Cannot Be Null")
+    private AccessGroupModel accessGroup;
     @Data
     public static class BankAdminRequest {
         private String adminName;
-        private String gender;
         private String email;
         private String password;
-        private String mobile;
-    }
 
+
+    }
 }

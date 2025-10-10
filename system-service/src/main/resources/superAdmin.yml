@@ -1,0 +1,17 @@
+data-init:
+  superAdmins:
+    - firstName: SUPER
+      lastName: ADMIN
+      username: superadmin@gamil.com
+      password: superadmin
+      email: superadmin@.com
+      mobileNumber: 97714424336
+      address: Hattisar, Kathmandu
+      gender: Male
+      accessGroup:
+        name: SUPERADMIN_GROUP
+        description: Group for Super Administrators
+      status:
+        name: CREATED
+        description: "Initial status"
+        icon: ""

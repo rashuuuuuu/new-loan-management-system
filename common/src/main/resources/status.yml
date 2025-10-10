@@ -1,0 +1,26 @@
+data-init:
+  statusList:
+    -
+      name: CREATED
+      description: CREATED
+      icon: badge--created
+    -
+      name: UPDATED
+      description: UPDATED
+      icon: badge--updated
+    -
+      name: DELETED
+      description: DELETED
+      icon: badge--deleted
+    -
+      name: BLOCKED
+      description: BLOCKED
+      icon: badge--blocked
+    -
+      name: UNBLOCKED
+      description: UNBLOCKED
+      icon: badge--unblocked
+    -
+      name: ACTIVE
+      description: ACTIVE
+      icon: badge--active

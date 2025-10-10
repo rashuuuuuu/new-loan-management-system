@@ -33,6 +33,7 @@ public class ApiConstants {
     public static final String ROLES="/roles";
     public static final String STATUS="/status";
     public static final String ADMIN="/admin";
+    public static final String EMPTY="/empty";
 
 }
 

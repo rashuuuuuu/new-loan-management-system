@@ -3,20 +3,14 @@ package com.rashmita.systemservice.mapper;
 import com.rashmita.systemservice.constants.StatusConstants;
 import com.rashmita.systemservice.entity.Bank;
 import com.rashmita.systemservice.entity.BankAdmin;
-import com.rashmita.systemservice.entity.Roles;
+import com.rashmita.systemservice.entity.Status;
+import com.rashmita.systemservice.entity.User;
 import com.rashmita.systemservice.exception.NotFoundException;
 import com.rashmita.systemservice.model.*;
-import com.rashmita.systemservice.repository.BankAdminRepository;
-import com.rashmita.systemservice.repository.BankRepository;
-import com.rashmita.systemservice.repository.StatusRepository;
-import com.rashmita.systemservice.constants.RoleEnum;
-import com.rashmita.systemservice.entity.User;
-import com.rashmita.systemservice.repository.RoleRepository;
-import com.rashmita.systemservice.repository.UserRepository;
+import com.rashmita.systemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,97 +21,96 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class BankMapper {
+
     private final BankRepository bankRepository;
-    /**
-     * rashmita subedi
-     */
-    @Autowired
-    private final ModelMapper modelMapper;
     private final BankAdminRepository bankAdminRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
     private final StatusRepository statusRepository;
+    private final AccessGroupRepository accessGroupRepository;
+    private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
+
+    /**
+     * Only SuperAdmin creates a bank.
+     */
 
     @Transactional
-    public Bank saveBankDetails(BankRequest bankRequest) {
-        Roles bankAdminRole = roleRepository.findByName(RoleEnum.BANKADMIN)
-                .orElseThrow(() -> new RuntimeException("Role BANK_ADMIN not found"));
+    public Bank saveBankDetails(BankRequest bankRequest) throws NotFoundException {
+        log.info("Saving new bank details for bankCode={}", bankRequest.getBankCode());
 
-        // 1. Create and save user
-        User user = new User();
-        user.setFullName(bankRequest.getBankAdminRequest().getAdminName());
-        user.setEmail(bankRequest.getBankAdminRequest().getEmail());
-        user.setPassword(passwordEncoder.encode(bankRequest.getBankAdminRequest().getPassword()));
-        user.setRole(bankAdminRole);
-        user.setStatus(statusRepository.findByName(StatusConstants.CREATED.getName()));
-        user = userRepository.save(user);
+        var accessGroupName = bankRequest.getAccessGroup().getName();
+        var accessGroup = accessGroupRepository.findByName(accessGroupName)
+                .orElseThrow(() -> new NotFoundException("Access group not found: " + accessGroupName));
 
-        // 2. Create BankAdmin
         BankAdmin bankAdmin = new BankAdmin();
-        bankAdmin.setName(bankRequest.getBankAdminRequest().getAdminName());
         bankAdmin.setEmail(bankRequest.getBankAdminRequest().getEmail());
         bankAdmin.setPassword(passwordEncoder.encode(bankRequest.getBankAdminRequest().getPassword()));
-        bankAdmin.setStatus(statusRepository.findByName(StatusConstants.CREATED.getName()));
-
-        // 3. Create and save bank with bankAdmin
+        bankAdmin.setAccessGroup(accessGroup);
+        Status createdStatus = statusRepository.getStatusByName(StatusConstants.CREATED.getName());
+        bankAdmin.setStatus(createdStatus);
+        User user = new User();
+        user.setEmail(bankRequest.getBankAdminRequest().getEmail());
+        user.setPassword(passwordEncoder.encode(bankRequest.getBankAdminRequest().getPassword()));
+        user.setUsername(bankRequest.getBankAdminRequest().getEmail());
+        user.setStatus(createdStatus);
+        user.setAccessGroup(accessGroup);
         Bank bank = new Bank();
-        bank.setAddress(bankRequest.getBankAddress());
         bank.setBankCode(bankRequest.getBankCode());
+        bank.setAddress(bankRequest.getBankAddress());
         bank.setEstablishedDate(bankRequest.getEstablishedDate());
-        bank.setStatus(statusRepository.findByName(StatusConstants.CREATED.getName()));
+        bank.setStatus(createdStatus);
         bank.setBankAdmin(bankAdmin);
         bankAdmin.setBank(bank);
-        bankAdminRepository.save(bankAdmin);// set before saving
-        bank = bankRepository.save(bank);
-
+        userRepository.save(user);
+        bankRepository.save(bank);
+        log.info(" Bank created successfully with code {}", bank.getBankCode());
         return bank;
     }
 
-    public Bank updateBankDetails(BankUpdateRequest bankUpdateRequest) {
-
-        String bankCode = bankUpdateRequest.getBankCode();
-        Bank bank = bankRepository.getByBankCode(bankCode);
-        if (bankUpdateRequest.getBankCode() != null) {
-        bank.setIsActive(bankUpdateRequest.getIsActive());
+    public Bank updateBankDetails(BankUpdateRequest bankUpdateRequest) throws NotFoundException {
+        Bank bank = bankRepository.getByBankCode(bankUpdateRequest.getBankCode());
+        if (bank == null) {
+            throw new NotFoundException("Bank not found for code: " + bankUpdateRequest.getBankCode());
         }
+
+        if (bankUpdateRequest.getIsActive() != null) {
+            bank.setIsActive(bankUpdateRequest.getIsActive());
+        }
+
         return bankRepository.save(bank);
     }
 
-    public BankResponse getDetailsById(BankIdRequest bankIdRequest) throws NotFoundException {
+    public BankResponse getDetailsById(BankIdRequest bankId) throws NotFoundException {
+        Bank bank = bankRepository.findById(bankId)
+                .orElseThrow(() -> new NotFoundException("Bank not found with ID: " + bankId));
 
-        Bank bank = bankRepository.getBankDetailsById(bankIdRequest)
-                .orElseThrow(() -> new NotFoundException("Bank not found"));
-
-        if (bank.getStatus() == statusRepository.findByName(StatusConstants.DELETED.getName()) || bank.getBankCode() == null) {
-            throw new NotFoundException("Bank is inactive or missing bank code");
+        if (bank.getStatus().getName().equals(StatusConstants.DELETED.getName())) {
+            throw new NotFoundException("Bank is inactive or deleted");
         }
 
         return modelMapper.map(bank, BankResponse.class);
     }
 
+    @Transactional
+    public void deleteBank(BankCodeRequest bankCode) throws NotFoundException {
+        Optional<Bank> bankOpt = bankRepository.findByBankCode(bankCode.getBankCode());
+        if (bankOpt.isEmpty()) throw new NotFoundException("Bank not found for code: " + bankCode);
+
+        Bank bank = bankOpt.get();
+        BankAdmin admin = bankAdminRepository.findByBank(bank)
+                .orElseThrow(() -> new NotFoundException("Bank admin not found for bank: " + bankCode));
+
+        Status deletedStatus = statusRepository.getStatusByName(StatusConstants.DELETED.getName());
+        bank.setStatus(deletedStatus);
+        admin.setStatus(deletedStatus);
+
+        bankRepository.save(bank);
+        bankAdminRepository.save(admin);
+
+        log.info("Bank deleted successfully for code {}", bankCode);
+    }
     public BankResponse getByBankName(BankCodeRequest bankCodeRequest) throws NotFoundException {
         Bank bank = bankRepository.getByBankCode(String.valueOf(bankCodeRequest));
-
-        if (bank.getStatus() == statusRepository.findByName(StatusConstants.DELETED.getName()) || bank.getBankCode() == null) {
-            throw new NotFoundException("Bank is inactive or missing bank code");
-        }
-        return modelMapper.map(bank, BankResponse.class);
-    }
-
-    public void deleteBank(BankCodeRequest bankCodeRequest) {
-        Optional<Bank> bankOptional = bankRepository.findByBankCode(bankCodeRequest.getBankCode());
-        Optional<BankAdmin> bankAdmin=bankAdminRepository.findByBank(bankOptional.get());
-
-        if (bankOptional.isPresent()) {
-            Bank foundBank = bankOptional.get();
-            BankAdmin foundBankAdmin = bankAdmin.get();
-            foundBankAdmin.setStatus(statusRepository.findByName(StatusConstants.DELETED.getName()));
-            foundBank.setStatus(statusRepository.findByName(StatusConstants.DELETED.getName()));
-            bankRepository.save(foundBank);
-        } else {
-            System.out.println("Bank does not exist");
-        }
-    }
-
+        if (bank.getStatus() == statusRepository.getStatusByName(StatusConstants.DELETED.getName()) || bank.getBankCode() == null) {
+            throw new NotFoundException("Bank is inactive or missing bank code"); } return modelMapper.map(bank, BankResponse.class); }
 }

@@ -39,8 +39,8 @@ public class BankUser extends AbstractEntity {
     @JoinColumn(name = "status_id", referencedColumnName = "id")
     private Status status;
 
+    @JoinColumn(name = "access_group", nullable = false, referencedColumnName = "id")
     @ManyToOne(optional = false)
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
-    private Roles role;
+    private AccessGroup accessGroup;
 
 }

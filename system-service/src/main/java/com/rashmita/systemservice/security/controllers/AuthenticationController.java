@@ -1,34 +1,37 @@
 package com.rashmita.systemservice.security.controllers;
+import com.rashmita.systemservice.entity.User;
+import com.rashmita.systemservice.exception.NotFoundException;
 import com.rashmita.systemservice.security.dtos.LoginUserDto;
 import com.rashmita.systemservice.security.dtos.RegisterResponse;
 import com.rashmita.systemservice.security.dtos.RegisterUserDto;
-import com.rashmita.systemservice.entity.User;
 import com.rashmita.systemservice.security.services.AuthenticationService;
 import com.rashmita.systemservice.security.services.JwtService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
-
 public class AuthenticationController {
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
     private final JwtService jwtUtils;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService,JwtService jwtUtils) {
+    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, JwtService jwtUtils) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
         this.jwtUtils = jwtUtils;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> register(@RequestBody RegisterUserDto registerUserDto) {
-      RegisterResponse registeredUser = authenticationService.signup(registerUserDto);
-        return ResponseEntity.ok("signup successful");
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterUserDto registerUserDto) throws NotFoundException {
+        RegisterResponse registeredUser = authenticationService.signup(registerUserDto);
+        return ResponseEntity.ok(registeredUser);
     }
 
     @PostMapping("/login")
@@ -51,5 +54,4 @@ public class AuthenticationController {
                 .headers(headers)
                 .body(body);
     }
-
 }

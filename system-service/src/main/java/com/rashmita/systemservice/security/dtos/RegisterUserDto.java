@@ -1,5 +1,7 @@
 package com.rashmita.systemservice.security.dtos;
 
+import com.rashmita.systemservice.model.AccessGroupModel;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -14,4 +16,7 @@ public class RegisterUserDto {
     private String password;
 
     private String fullName;
+
+    @NotNull(message = "Access Group Cannot Be Null")
+    private AccessGroupModel accessGroup;
 }

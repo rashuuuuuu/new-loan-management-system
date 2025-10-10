@@ -51,13 +51,13 @@ public class JwtService {
             long expiration
     )
     {
-        String roles = userDetails.getAuthorities().stream()
+        String accessgroup = userDetails.getAuthorities().stream()
                 .map(grantedAuthority -> grantedAuthority.getAuthority())
                 .collect(Collectors.joining(","));
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .claim("roles", roles)
+                .claim("access group", accessgroup)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
