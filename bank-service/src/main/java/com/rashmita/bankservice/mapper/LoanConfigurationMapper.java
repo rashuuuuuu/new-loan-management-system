@@ -1,7 +1,7 @@
 package com.rashmita.bankservice.mapper;
 
 import com.rashmita.common.entity.LoanConfiguration;
-import com.rashmita.bankservice.model.LoanConfigIdRequest;
+import com.rashmita.bankservice.model.LoanConfigBankCodeRequest;
 import com.rashmita.bankservice.model.LoanConfigurationRequest;
 import com.rashmita.bankservice.model.LoanConfigurationResponse;
 import com.rashmita.bankservice.model.LoanUpdateRequest;
@@ -62,16 +62,17 @@ public class LoanConfigurationMapper {
         }
         return loanConfigurationRepository.save(loanConfiguration);
     }
-        public LoanConfigurationResponse getDetailsById(LoanConfigIdRequest loanConfigIdRequest) throws NotFoundException {
-            LoanConfiguration loanConfiguration = loanConfigurationRepository.getLoanConfigurationById((loanConfigIdRequest));
-            if (loanConfiguration.getStatus() == StatusConstants.DELETED) {
+        public LoanConfigurationResponse getDetailsByBankCode(LoanConfigBankCodeRequest loanConfigBankCodeRequest) throws NotFoundException {
+            Optional<LoanConfiguration> loanConfiguration = loanConfigurationRepository.findByBankCode(String.valueOf((loanConfigBankCodeRequest.getBankCode())));
+            if (loanConfiguration.get().getStatus() == StatusConstants.DELETED) {
                 throw new NotFoundException("Loan configuration is unavailable");
             }
 
             return modelMapper.map(loanConfiguration, LoanConfigurationResponse.class);
         }
-    public void deleteLoanConfiguration(LoanConfigIdRequest loanConfigIdRequest) {
-        Optional<LoanConfiguration> loanConfigurationOptional = loanConfigurationRepository.findById(loanConfigIdRequest.getLoanConfigId());
+    public void deleteLoanConfiguration(LoanConfigBankCodeRequest loanConfigBankCodeRequest) {
+        Optional<LoanConfiguration> loanConfigurationOptional =
+                loanConfigurationRepository.findByBankCode(String.valueOf(loanConfigBankCodeRequest.getBankCode()));
         if (loanConfigurationOptional.isPresent()) {
             LoanConfiguration foundLoanConfig = loanConfigurationOptional.get();
             foundLoanConfig.setStatus(StatusConstants.DELETED);

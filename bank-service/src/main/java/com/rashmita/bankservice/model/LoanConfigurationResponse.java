@@ -8,8 +8,8 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class LoanConfigurationResponse {
-    private String minimumAmount;
-    private String maximumAmount;
+    private Double minimumAmount;
+    private Double maximumAmount;
     private Double interestRate;
     private Double lateFeeCharge;
     private Double loanAdministrationFeeRate;

@@ -1,5 +1,5 @@
 package com.rashmita.bankservice.controller;
-import com.rashmita.bankservice.model.LoanConfigIdRequest;
+import com.rashmita.bankservice.model.LoanConfigBankCodeRequest;
 import com.rashmita.bankservice.model.LoanConfigurationRequest;
 import com.rashmita.bankservice.model.LoanUpdateRequest;
 import com.rashmita.bankservice.service.LoanConfigurationService;
@@ -23,20 +23,23 @@ public class LoanConfigurationController {
     }
     @PostMapping(UPDATE)
     @PreAuthorize("hasAuthority('MODIFY_LOAN_CONFIGURATION')")
-    public ServerResponse<?> updateCustomer(@Valid @RequestBody LoanUpdateRequest loanUpdateRequest) {
+    public ServerResponse<?> updateLoanConfig(@Valid @RequestBody LoanUpdateRequest loanUpdateRequest) {
         return loanConfigurationService.updateLoanConfig(loanUpdateRequest);
     }
 
     @PostMapping(DELETE)
     @PreAuthorize("hasAuthority('DELETE_LOAN_CONFIGURATION')")
-    public ServerResponse<?> deleteCustomer(@Valid @RequestBody LoanConfigIdRequest loanConfigIdRequest) {
-        return loanConfigurationService.deleteLoanConfig(loanConfigIdRequest);
+    public ServerResponse<?> deleteLoanConfig(@Valid @RequestBody LoanConfigBankCodeRequest loanConfigBankCodeRequest) {
+        return loanConfigurationService.deleteLoanConfig(loanConfigBankCodeRequest);
     }
 
-    @GetMapping(GET+BY+ID)
+    @GetMapping("/get/by/{bankCode}")
     @PreAuthorize("hasAuthority('VIEW_LOAN_CONFIGURATION')")
-    public ServerResponse<?> getCustomerById(@Valid @RequestParam LoanConfigIdRequest loanConfigIdRequest) throws NotFoundException {
-        return loanConfigurationService.getLoanConfigById(loanConfigIdRequest);
+    public ServerResponse<?> getLoanConfigurationByBankCode(
+            @PathVariable String bankCode) throws NotFoundException {
+        LoanConfigBankCodeRequest request = new LoanConfigBankCodeRequest();
+        request.setBankCode(bankCode);
+        return loanConfigurationService.getLoanConfigByBankCode(request);
     }
 
 }

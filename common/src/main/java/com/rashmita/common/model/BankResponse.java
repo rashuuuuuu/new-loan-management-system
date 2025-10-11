@@ -10,5 +10,4 @@ public class BankResponse {
     private String statusId;
     private String bankCode;
     private String establishedDate;
-
 }
