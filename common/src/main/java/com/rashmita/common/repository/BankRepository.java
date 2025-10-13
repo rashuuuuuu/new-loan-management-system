@@ -18,6 +18,7 @@ public interface BankRepository extends JpaRepository<Bank, Long> {
     Optional<Bank> findByBankCode(String bankCodeRequest);
 
 //    Optional<Bank> getBankDetailsByBankNameIgnoreCase(String nameRequest);
-
     Bank getByBankCode(String bankCode);
+
+    Optional<Bank> getBankByBankCode(String bankCode);
 }

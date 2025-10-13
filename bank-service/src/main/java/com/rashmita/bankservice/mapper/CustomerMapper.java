@@ -46,6 +46,7 @@ public class CustomerMapper {
         customer.setBank(bankRepository.getByBankCode(customerRequest.getBankCode()));
         customer.setCustomerNumber(customerRequest.getCustomerNumber());
         customer.setAccountNumber(RandomNumberGenerator.generate10DigitRandomNumber());
+        customer.setAmount("0.0");
         customer.setStatus(statusRepository.getStatusByName(StatusConstants.CREATED.getName()));
         return customerRepository.save(customer);
     }

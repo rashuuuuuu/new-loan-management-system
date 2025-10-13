@@ -1,9 +1,7 @@
 package com.rashmita.commoncommon.model;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import java.io.Serializable;
-
 public class ModelBase implements Serializable {
 
     @Override

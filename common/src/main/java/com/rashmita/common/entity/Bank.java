@@ -33,8 +33,6 @@ public class Bank extends AbstractEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "status_id", referencedColumnName = "id")
     private Status status;
-    @OneToOne(mappedBy = "bank", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private LoanConfiguration loanConfiguration;
     @OneToMany(mappedBy = "bank", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Customer> customers = new ArrayList<>();
 }

@@ -1,16 +1,16 @@
 package com.rashmita.loandisbursement.client;
 
+import com.rashmita.commoncommon.model.CreditScoreByAccountNumber;
 import com.rashmita.commoncommon.model.CreditScoreResponse;
 import com.rashmita.commoncommon.model.ServerResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "creditscore-service", url = "http://localhost:9099") // replace port with your service port
 public interface CreditScoreClient {
-    @GetMapping("/credit-score/get/by/{bankCode}/{customerNumber}")
+    @PostMapping("/creditscore/get/by/accountnumber") // matches controller
     ServerResponse<CreditScoreResponse> getCustomerByBankCodeAndAccountNumber(
-            @PathVariable("bankCode") String bankCode,
-            @PathVariable("customerNumber") String customerNumber
+            @RequestBody CreditScoreByAccountNumber request
     );
 }

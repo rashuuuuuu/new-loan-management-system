@@ -33,12 +33,9 @@ public class LoanConfigurationController {
         return loanConfigurationService.deleteLoanConfig(loanConfigBankCodeRequest);
     }
 
-    @GetMapping("/get/by/{bankCode}")
-    @PreAuthorize("hasAuthority('VIEW_LOAN_CONFIGURATION')")
+    @PostMapping("/get/by/code")
     public ServerResponse<?> getLoanConfigurationByBankCode(
-            @PathVariable String bankCode) throws NotFoundException {
-        LoanConfigBankCodeRequest request = new LoanConfigBankCodeRequest();
-        request.setBankCode(bankCode);
+            @RequestBody LoanConfigBankCodeRequest request) throws NotFoundException {
         return loanConfigurationService.getLoanConfigByBankCode(request);
     }
 

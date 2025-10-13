@@ -1,9 +1,7 @@
 package com.rashmita.loandisbursement.entity;
 
 import com.rashmita.commoncommon.entity.AbstractEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,16 +28,23 @@ public class LoanDetails extends AbstractEntity {
     @Column(name="loan_amount",nullable=false)
     private Double loanAmount;
 
-    @Column(name="loan_tenure")
-    private int loanTenure;
+    @Column(name = "tenure", nullable = false)
+    private int tenure;
 
     @Column(name="loan_number",nullable = false)
     private String loanNumber;
 
-    @Column(name="transaction_id",nullable=false)
-    private String transactionId;
+    @Column(name="transaction_token",nullable=false)
+    private String transaction_token;
 
     @Column(name="created_at",nullable = false)
     private Date createdAt;
+
+    @Column(name="status",nullable = false)
+    private String status;
+
+    @Column(name = "start_date", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date startDate;
 
 }

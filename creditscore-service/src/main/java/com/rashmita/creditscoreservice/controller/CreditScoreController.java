@@ -1,5 +1,6 @@
 package com.rashmita.creditscoreservice.controller;
 import com.rashmita.commoncommon.exception.NotFoundException;
+import com.rashmita.commoncommon.model.CreditScoreByAccountNumber;
 import com.rashmita.commoncommon.model.ServerResponse;
 import com.rashmita.creditscoreservice.model.CreditScoreRequest;
 import com.rashmita.creditscoreservice.service.CreditScoreService;
@@ -17,11 +18,10 @@ public class CreditScoreController {
     public ServerResponse<?> getCreditScoreByAccountNumber(@Valid @RequestBody CreditScoreRequest creditScoreRequest) throws NotFoundException {
         return creditScoreService.getCreditScoreByAccountNumber(creditScoreRequest);
     }
-    @GetMapping("/get/by/{bankCode}/{customerNumber}")
+    @PostMapping("/get/by/accountnumber")
     public ServerResponse<?> getCustomerByBankCodeAndAccountNumber(
-            @PathVariable String bankCode,
-            @PathVariable String customerNumber) throws NotFoundException {
-        return creditScoreService.getCustomerByBankCodeAndAccountNumber(bankCode, customerNumber);
+            @Valid @RequestBody CreditScoreByAccountNumber creditScoreRequest) throws NotFoundException {
+        return creditScoreService.getCustomerByBankCodeAndAccountNumber(creditScoreRequest);
     }
 
 }

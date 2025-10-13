@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface CreditScoreRepository extends JpaRepository<CreditScore, Long> {
    @Query("SELECT c FROM CreditScore c WHERE c.bankCode = :bankCode AND c.accountNumber = :accountNumber")
-   Optional<CreditScore> findCustomerByBankCodeAndAccountNumber(
+   List<CreditScore> findCustomerByBankCodeAndAccountNumber(
            @Param("bankCode") String bankCode,
            @Param("accountNumber") String accountNumber);
 

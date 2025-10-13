@@ -1,9 +1,6 @@
 package com.rashmita.bankservice.controller;
 
-import com.rashmita.bankservice.model.CustomerIdRequest;
-import com.rashmita.bankservice.model.CustomerRequest;
-import com.rashmita.bankservice.model.CustomerResponse;
-import com.rashmita.bankservice.model.CustomerUpdateRequest;
+import com.rashmita.bankservice.model.*;
 import com.rashmita.bankservice.repository.CustomerRepository;
 import com.rashmita.bankservice.service.CustomerService;
 import com.rashmita.common.constants.ApiConstants;
@@ -55,11 +52,9 @@ public class CustomerController {
         return customerService.getCustomerById(customerIdRequest);
     }
 
-    @GetMapping("/get/by/code/{bankCode}/{customerNumber}")
-    public CustomerResponse getCustomerByBankCodeAndCustomerNumber(
-            @PathVariable String bankCode,
-            @PathVariable String customerNumber) {
-        return customerService.getCustomerByBankCodeAndCustomerNumber(bankCode, customerNumber);
+    @PostMapping("/get/by/code/customernumber")
+    public CustomerResponse getCustomerByBankCodeAndCustomerNumber(@Valid @RequestBody BankIdAndCustomerRequest bankIdAndCustomerRequest) throws NotFoundException {
+        return customerService.getCustomerByBankCodeAndCustomerNumber(bankIdAndCustomerRequest);
     }
 
     @GetMapping(GET + ALL)

@@ -43,7 +43,6 @@ public class AccessGroupMapper {
         if (accessGroup == null) return null;
 
         SearchAccessGroupResponse response = modelMapper.map(accessGroup, SearchAccessGroupResponse.class);
-
         // Map nested Status manually if needed
         if (accessGroup.getStatus() != null) {
             response.setStatus(modelMapper.map(accessGroup.getStatus(), StatusDto.class));

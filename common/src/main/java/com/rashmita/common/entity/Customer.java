@@ -47,7 +47,7 @@ public class Customer extends AbstractEntity {
     @JoinColumn(name = "status_id", referencedColumnName = "id")
     private Status status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "bank_id", referencedColumnName = "id", nullable = false)
     private Bank bank;
 

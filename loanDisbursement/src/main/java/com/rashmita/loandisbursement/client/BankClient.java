@@ -1,21 +1,23 @@
 package com.rashmita.loandisbursement.client;
 
+import com.rashmita.commoncommon.model.BankIdAndCustomerRequest;
+import com.rashmita.commoncommon.model.LoanConfigBankCodeRequest;
 import com.rashmita.commoncommon.model.ServerResponse;
 import com.rashmita.loandisbursement.model.CustomerResponse;
 import com.rashmita.loandisbursement.model.LoanConfigurationResponse;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 @FeignClient(name = "bank-service", url = "http://localhost:9096")
 public interface BankClient {
 
-    // Correct path variable annotations
-    @GetMapping("/customer/get/by/code/{bankCode}/{customerNumber}")
-    CustomerResponse getCustomerByBankCodeAndCustomerNumber(
-            @PathVariable("bankCode") String bankCode,
-            @PathVariable("customerNumber") String customerNumber);
+    @PostMapping("customer/get/by/code/customernumber")
+    CustomerResponse getCustomerByBankCodeAndCustomerNumber(@Valid @RequestBody BankIdAndCustomerRequest bankIdAndCustomerRequest);
 
-    @GetMapping("/loanconfiguration/get/by/{bankCode}") // add leading slash
+    @PostMapping("/loanconfiguration/get/by/code")
     ServerResponse<LoanConfigurationResponse> getLoanConfigurationByBankCode(
-            @PathVariable("bankCode") String bankCode);
+            @RequestBody LoanConfigBankCodeRequest request);
+
 }

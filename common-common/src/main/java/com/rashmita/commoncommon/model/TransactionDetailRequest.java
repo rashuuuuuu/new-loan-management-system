@@ -1,19 +1,17 @@
 package com.rashmita.commoncommon.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionDetail {
+public class TransactionDetailRequest {
     private String accountNumber;
-    private String type;
+    private String type; // DEBIT or CREDIT
     private Double amount;
     private String particularRemarks;
     private LocalDate valueDate;

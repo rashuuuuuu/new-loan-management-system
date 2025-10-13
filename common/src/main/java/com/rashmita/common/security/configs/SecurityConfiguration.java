@@ -32,9 +32,11 @@ public class SecurityConfiguration {
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/signup/**", "/auth/login/**","/customer/**").permitAll() // allow signup/login without token
-                        .requestMatchers("/bank/**").hasAnyAuthority("CREATE_BANK","MODIFY_BANK","DELETE_BANK","VIEW_BANK","BANK")
-                        .requestMatchers("/bankuser/**").hasAnyAuthority("BANK_ADMIN","BANK_USER","CREATE_BANK_USER","MODIFY_BANK_USER","DELETE_BANK_USER","VIEW_BANK_USER")
-                        .requestMatchers("/loanconfiguration/**").hasAnyAuthority("CREATE_LOAN_CONFIGURATION","VIEW_LOAN_CONFIGURATION","MODIFY_LOAN_CONFIGURATION")
+//                        .requestMatchers("/bank/**").hasAnyAuthority("CREATE_BANK","MODIFY_BANK","DELETE_BANK","VIEW_BANK","BANK")
+//                        .requestMatchers("/bankuser/**").hasAnyAuthority("BANK_ADMIN","BANK_USER","CREATE_BANK_USER","MODIFY_BANK_USER","DELETE_BANK_USER","VIEW_BANK_USER")
+//                        .requestMatchers("/loanconfiguration/**").hasAnyAuthority("CREATE_LOAN_CONFIGURATION","VIEW_LOAN_CONFIGURATION","MODIFY_LOAN_CONFIGURATION")
+                        .requestMatchers("/bank/**").permitAll()
+                        .requestMatchers("/loanconfiguration/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement()

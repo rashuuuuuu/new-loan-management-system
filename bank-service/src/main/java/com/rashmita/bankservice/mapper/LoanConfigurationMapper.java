@@ -1,5 +1,6 @@
 package com.rashmita.bankservice.mapper;
 
+import com.rashmita.common.entity.Bank;
 import com.rashmita.common.entity.LoanConfiguration;
 import com.rashmita.bankservice.model.LoanConfigBankCodeRequest;
 import com.rashmita.bankservice.model.LoanConfigurationRequest;
@@ -29,20 +30,27 @@ public class LoanConfigurationMapper {
     private final ModelMapper modelMapper;
     private final LoanConfigurationRepository loanConfigurationRepository;
     private final BankRepository bankRepository;
-    public LoanConfiguration saveLoanConfiguration(LoanConfigurationRequest loanConfigurationRequest) {
-        LoanConfiguration loanConfiguration = new LoanConfiguration();
-        loanConfiguration.setMaximumLoanPeriod(loanConfigurationRequest.getMaximumLoanPeriod());
-        loanConfiguration.setMaximumLoanPeriod(loanConfigurationRequest.getMaximumLoanPeriod());
-        loanConfiguration.setLoanAdministrationFeeAmount(loanConfigurationRequest.getLoanAdministrationFeeAmount());
-        loanConfiguration.setDefaultingPeriod(loanConfigurationRequest.getDefaultingPeriod());
-        loanConfiguration.setMaximumLoanPeriod(loanConfigurationRequest.getMaximumLoanPeriod());
-        loanConfiguration.setInterestRate(loanConfigurationRequest.getInterestRate());
-        loanConfiguration.setModifiedDate(new Date());
-        loanConfiguration.setStatus(StatusConstants.CREATED);
-        loanConfiguration.setLateFeeCharge(loanConfigurationRequest.getLateFeeCharge());
-        loanConfiguration.setLoanAdministrationFeeRate(loanConfigurationRequest.getLoanAdministrationFeeRate());
-        loanConfiguration.setBank(bankRepository.getByBankCode(loanConfigurationRequest.getBankIdRequest().getBankCode()));
-        return loanConfigurationRepository.save(loanConfiguration);
+    public LoanConfiguration saveLoanConfiguration(LoanConfigurationRequest request) {
+        Bank bank = bankRepository.findByBankCode(request.getBankIdRequest().getBankCode())
+                .orElseThrow(() -> new RuntimeException(
+                        "Bank not found with code: " + request.getBankIdRequest().getBankCode()));
+
+        LoanConfiguration lc = new LoanConfiguration();
+        lc.setMinimumAmount(request.getMinimumAmount());
+        lc.setMaximumAmount(request.getMaximumAmount());
+        lc.setInterestRate(request.getInterestRate());
+        lc.setLateFeeCharge(request.getLateFeeCharge());
+        lc.setLoanAdministrationFeeRate(request.getLoanAdministrationFeeRate());
+        lc.setLoanAdministrationFeeAmount(request.getLoanAdministrationFeeAmount());
+        lc.setDefaultingPeriod(request.getDefaultingPeriod());
+        lc.setMaximumLoanPeriod(request.getMaximumLoanPeriod());
+        lc.setModifiedDate(new Date());
+        lc.setStatus(StatusConstants.CREATED);
+
+        // Set the bank
+        lc.setBank(bank);
+
+        return loanConfigurationRepository.save(lc);
     }
 
     public LoanConfiguration updateLoanConfiguration(LoanUpdateRequest loanUpdateRequest) {
@@ -62,14 +70,16 @@ public class LoanConfigurationMapper {
         }
         return loanConfigurationRepository.save(loanConfiguration);
     }
-        public LoanConfigurationResponse getDetailsByBankCode(LoanConfigBankCodeRequest loanConfigBankCodeRequest) throws NotFoundException {
-            Optional<LoanConfiguration> loanConfiguration = loanConfigurationRepository.findByBankCode(String.valueOf((loanConfigBankCodeRequest.getBankCode())));
-            if (loanConfiguration.get().getStatus() == StatusConstants.DELETED) {
-                throw new NotFoundException("Loan configuration is unavailable");
-            }
-
-            return modelMapper.map(loanConfiguration, LoanConfigurationResponse.class);
-        }
+//    public LoanConfigurationResponse getDetailsByBankCode(LoanConfigBankCodeRequest request) throws NotFoundException {
+//        LoanConfiguration loanConfig = loanConfigurationRepository.findByBankCode(request.getBankCode())
+//                .orElseThrow(() -> new NotFoundException("Loan configuration not found"));
+//
+//        if (loanConfig.getStatus() == StatusConstants.DELETED) {
+//            throw new NotFoundException("Loan configuration is unavailable");
+//        }
+//
+//        return modelMapper.map(loanConfig, LoanConfigurationResponse.class);
+//    }
     public void deleteLoanConfiguration(LoanConfigBankCodeRequest loanConfigBankCodeRequest) {
         Optional<LoanConfiguration> loanConfigurationOptional =
                 loanConfigurationRepository.findByBankCode(String.valueOf(loanConfigBankCodeRequest.getBankCode()));

@@ -39,11 +39,9 @@ public class BankMapper {
     @Transactional
     public Bank saveBankDetails(BankRequest bankRequest) throws NotFoundException {
         log.info("Saving new bank details for bankCode={}", bankRequest.getBankCode());
-
         var accessGroupName = bankRequest.getAccessGroup().getName();
         var accessGroup = accessGroupRepository.findByName(accessGroupName)
                 .orElseThrow(() -> new NotFoundException("Access group not found: " + accessGroupName));
-
         BankAdmin bankAdmin = new BankAdmin();
         bankAdmin.setEmail(bankRequest.getBankAdminRequest().getEmail());
         bankAdmin.setPassword(passwordEncoder.encode(bankRequest.getBankAdminRequest().getPassword()));

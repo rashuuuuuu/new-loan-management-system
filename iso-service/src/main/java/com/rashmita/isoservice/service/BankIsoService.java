@@ -1,8 +1,7 @@
 package com.rashmita.isoservice.service;
 
-import com.rashmita.commoncommon.model.FundTransferRequest;
-import com.rashmita.commoncommon.model.FundTransferResponse;
+import com.rashmita.commoncommon.model.TransactionRequest;
 
 public interface BankIsoService {
-   public  FundTransferResponse transferFunds(FundTransferRequest request);
+   public void processMultiTransaction(TransactionRequest request);
 }

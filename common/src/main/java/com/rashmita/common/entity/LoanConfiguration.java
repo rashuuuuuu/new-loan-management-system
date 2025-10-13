@@ -45,7 +45,7 @@ public class LoanConfiguration extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private StatusConstants status;
 
-    @JoinColumn(name = "bank", referencedColumnName = "id", nullable = false)
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne
+    @JoinColumn(name = "bank_id", referencedColumnName = "id", nullable = false)
     private Bank bank;
 }

@@ -5,14 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class FundTransferRequest {
-    private String loanNumber;
-    private String uniqueTransactionId;
-    private List<TransactionDetail> transactions;
+  private String from;
+  private String to;
+
 }
