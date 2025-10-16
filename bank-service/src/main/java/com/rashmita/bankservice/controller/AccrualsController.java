@@ -4,6 +4,7 @@ import com.rashmita.bankservice.model.LoanNumberModel;
 import com.rashmita.common.constants.ApiConstants;
 import com.rashmita.common.model.ServerResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccrualsController {
     private final AccrualsClient accrualsClient;
     @PostMapping("/by/loannumber")
+    @PreAuthorize("hasAuthority('REPORT_VIEWER')")
     public ServerResponse<?> getAccrual(@RequestBody LoanNumberModel loanNumber) {
         return accrualsClient.createTotalAccrualsByLoanNumber(loanNumber);
     }

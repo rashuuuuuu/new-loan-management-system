@@ -1,5 +1,4 @@
 package com.rashmita.accuralsservice.service.AccuralsServiceImpl;
-
 import com.rashmita.accuralsservice.service.AccuralsService;
 import com.rashmita.commoncommon.entity.EmiSchedule;
 import com.rashmita.commoncommon.entity.LoanDetails;
@@ -100,16 +99,6 @@ public class DailyAccurals {
                         emiRepo.save(s);
                         loanRepo.save(loan);
                     }
-
-//                    try {
-//                        LoanNumberModel loanNumberModel=new LoanNumberModel();
-//                        loanNumberModel.setLoanNumber(loan.getLoanNumber());
-//                        double accuralByLoanNumber =
-//                                totalPayable.calculateAccrualsByLoanNumber(loanNumberModel);
-//                        log.info("Accrual calculated for loan {}: {}", loan.getLoanNumber(), accuralByLoanNumber);
-//                    } catch (Exception e) {
-//                        log.error("Error running daily accrual job: ", e);
-//                    }
                 }
             }
         }
