@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TransactionDetail extends AbstractEntity {
     private String loanNumber;
-    @UniqueTransactionId
     private String transactionId;
     private String accountNumber;
     private String fromAccount;

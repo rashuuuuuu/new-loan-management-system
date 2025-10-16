@@ -4,9 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+
 
 @Getter
 @Setter
@@ -17,16 +16,19 @@ public class LoanBookResponse {
     private String bankCode;
     private String transactionToken;
     private String status;
-    private List<EmiCalculation> emi = new ArrayList<>();
+    //    private List<EmiCalculation> emi = new ArrayList<>();
     private String otp;
+    private int emiMonths;
+    private Double emiAmount;
+    private Date paymentDate;
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class EmiCalculation {
-        private int emiMonths;
-        private double emiAmount;
-        private Date paymentDate;
-
-    }
+//    @Getter
+//    @Setter
+//    @NoArgsConstructor
+//    public static class EmiCalculation {
+//        private int emiMonths;
+//        private double emiAmount;
+//        private Date paymentDate;
+//
+//    }
 }

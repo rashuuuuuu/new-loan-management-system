@@ -13,8 +13,8 @@ public class LoanUpdateRequest {
     private Long id;
     private int minimumAmount;
     private int maximumAmount;
-    private Double interestRate;
-    private Double lateFeeCharge;
+    private int interestRate;
+    private double lateFeeCharge;
     private Double loanAdministrationFeeRate;
     private Double loanAdministrationFeeAmount;
     private int defaultingPeriod;

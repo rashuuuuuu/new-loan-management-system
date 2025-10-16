@@ -17,18 +17,18 @@ import static com.rashmita.common.constants.ApiConstants.*;
 public class LoanConfigurationController {
     private final LoanConfigurationService loanConfigurationService;
     @PostMapping(CREATE)
-    @PreAuthorize("hasAuthority('CREATE_LOAN_CONFIGURATION')")
+//    @PreAuthorize("hasAuthority('CREATE_LOAN_CONFIGURATION')")
     public ServerResponse<?> createLoanConfig(@Valid @RequestBody LoanConfigurationRequest loanConfigurationRequest) {
         return loanConfigurationService.createLoanConfig(loanConfigurationRequest);
     }
     @PostMapping(UPDATE)
-    @PreAuthorize("hasAuthority('MODIFY_LOAN_CONFIGURATION')")
+//    @PreAuthorize("hasAuthority('MODIFY_LOAN_CONFIGURATION')")
     public ServerResponse<?> updateLoanConfig(@Valid @RequestBody LoanUpdateRequest loanUpdateRequest) {
         return loanConfigurationService.updateLoanConfig(loanUpdateRequest);
     }
 
     @PostMapping(DELETE)
-    @PreAuthorize("hasAuthority('DELETE_LOAN_CONFIGURATION')")
+//    @PreAuthorize("hasAuthority('DELETE_LOAN_CONFIGURATION')")
     public ServerResponse<?> deleteLoanConfig(@Valid @RequestBody LoanConfigBankCodeRequest loanConfigBankCodeRequest) {
         return loanConfigurationService.deleteLoanConfig(loanConfigBankCodeRequest);
     }

@@ -3,8 +3,8 @@
 //import com.rashmita.commoncommon.model.*;
 //import com.rashmita.loandisbursement.client.BankClient;
 //import com.rashmita.loandisbursement.client.CreditScoreClient;
-//import com.rashmita.loandisbursement.model.CustomerResponse;
-//import com.rashmita.loandisbursement.model.LoanConfigurationResponse;
+//import com.rashmita.commoncommon.model.CustomerResponse;
+//import com.rashmita.commoncommon.model.LoanConfigurationResponse;
 //import com.rashmita.loandisbursement.model.LoanProcessRequest;
 //import com.rashmita.loandisbursement.model.LoanProcessResponse;
 //import com.rashmita.loandisbursement.service.LoanProcessService;

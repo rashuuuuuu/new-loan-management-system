@@ -17,4 +17,6 @@ public class LoanConfigurationResponse {
     private int defaultingPeriod;
     private int maximumLoanPeriod;
     private Date modifiedDate;
+    private int penaltyInterest;
+    private int overdueInterest;
 }

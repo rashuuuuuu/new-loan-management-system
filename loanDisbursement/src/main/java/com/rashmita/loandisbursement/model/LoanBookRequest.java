@@ -15,7 +15,7 @@ public class LoanBookRequest {
     private String transactionToken;
     private String oneMonthEmi;
     private int emiMonths;
-    private String emiAmount;
+    private Double emiAmount;
     private String paymentDate;
     private String otp;
 }

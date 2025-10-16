@@ -129,3 +129,9 @@ data-init:
       description: Modify Bank User
       parentName: Bank Users
       permission: MODIFY_BANK_USER
+
+    - name: Report viewer
+      description: Report Viewer
+      parentName:
+      Permission: REPORT_VIEWER
+

@@ -20,7 +20,7 @@ public class LoanConfiguration extends AbstractEntity {
     private int maximumAmount;
 
     @Column(name="interest_rate",nullable = false)
-    private Double interestRate;
+    private int interestRate;
 
     @Column(name="late_fee_charge",nullable = false)
     private Double lateFeeCharge;
@@ -40,6 +40,13 @@ public class LoanConfiguration extends AbstractEntity {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
+
+
+    @Column(name="overdue_interest")
+    private int overdueInterest;
+
+    @Column(name="penalty_interest")
+    private int penaltyInterest;
 
     @Column(name = "customer_status")
     @Enumerated(EnumType.STRING)

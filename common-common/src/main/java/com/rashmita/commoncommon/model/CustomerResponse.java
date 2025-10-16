@@ -1,4 +1,4 @@
-package com.rashmita.loandisbursement.model;
+package com.rashmita.commoncommon.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

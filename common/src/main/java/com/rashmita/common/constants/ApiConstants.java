@@ -37,6 +37,7 @@ public class ApiConstants {
     public static final String REGISTER="/register";
     public static final String CODE="/code";
     public static final String CUSTOMERNUMBER="/customernumber";
+    public static final String ACCRUALS="/accruals";
 
 }
 

@@ -11,11 +11,14 @@ import lombok.Setter;
 public class LoanConfigurationRequest {
     private int minimumAmount;
     private int maximumAmount;
-    private Double interestRate;
+    private int interestRate;
     private Double lateFeeCharge;
     private Double loanAdministrationFeeRate;
     private Double loanAdministrationFeeAmount;
     private int defaultingPeriod;
     private int maximumLoanPeriod;
     private BankIdRequest bankIdRequest;
+    private int overdueInterestRate;
+    private int penaltyInterestRate;
+
 }

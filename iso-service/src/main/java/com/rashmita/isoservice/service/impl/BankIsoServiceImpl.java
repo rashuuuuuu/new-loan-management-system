@@ -1,4 +1,5 @@
 package com.rashmita.isoservice.service.impl;
+
 import com.rashmita.commoncommon.model.TransactionRequest;
 import com.rashmita.isoservice.entity.BankMoney;
 import com.rashmita.isoservice.entity.TransactionDetail;
@@ -25,32 +26,46 @@ public class BankIsoServiceImpl implements BankIsoService {
     @Override
     @Transactional
     public void processMultiTransaction(TransactionRequest request) {
+        // Source account (could come from request too)
         String fromAccount = "ACC10001";
+
+        // Fetch source bank account
         BankMoney bankAccount = bankMoneyRepository.findByAccountNumber(fromAccount)
                 .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + fromAccount));
 
+        // Prepare to process
         BigDecimal totalTransfer = BigDecimal.ZERO;
-        List<TransactionDetail> details = new ArrayList<>();
+        List<TransactionDetail> transactionDetails = new ArrayList<>();
+
+        // Build transaction records
         for (var t : request.getTransactions()) {
             BigDecimal amount = BigDecimal.valueOf(t.getAmount());
             totalTransfer = totalTransfer.add(amount);
-            TransactionDetail td = new TransactionDetail();
-            td.setLoanNumber(request.getLoanNumber());
-            td.setTransactionId(request.getTransactionId());
-            td.setFromAccount(fromAccount);
-            td.setAccountNumber(t.getAccountNumber());
-            td.setTransferAmount(amount);
-            td.setParticularRemarks(t.getParticularRemarks());
-            td.setValueDate(t.getValueDate());
-            td.setTotalAmount(amount);
-            details.add(td);
+
+            TransactionDetail detail = new TransactionDetail();
+            detail.setLoanNumber(request.getLoanNumber());
+            detail.setTransactionId(request.getTransactionId());
+            detail.setFromAccount(fromAccount);
+            detail.setAccountNumber(t.getAccountNumber());
+            detail.setTransferAmount(amount);
+            detail.setParticularRemarks(t.getParticularRemarks());
+            detail.setValueDate(t.getValueDate());
+            detail.setTotalAmount(amount);
+            transactionDetails.add(detail);
         }
+
+        // Validate sufficient balance
         BigDecimal currentBalance = bankAccount.getTotalBalance();
-        BigDecimal newBalance = currentBalance.subtract(totalTransfer);
+        if (currentBalance.compareTo(totalTransfer) < 0) {
+            throw new IllegalStateException("Insufficient balance in account: " + fromAccount);
+        }
+
         bankAccount.setTransferAmount(totalTransfer);
-        bankAccount.setTotalBalance(newBalance);
+        bankAccount.setTotalBalance(currentBalance.subtract(totalTransfer));
         bankMoneyRepository.save(bankAccount);
-        transactionDetailRepository.saveAll(details);
-        log.info("Processed {} transactions, total transfer = {}", details.size(), totalTransfer);
+        transactionDetailRepository.saveAll(transactionDetails);
+
+        log.info("✅ Successfully processed {} transactions. Total transferred: {} from account {}",
+                transactionDetails.size(), totalTransfer, fromAccount);
     }
 }

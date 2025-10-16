@@ -44,6 +44,8 @@ public class LoanConfigurationMapper {
         lc.setLoanAdministrationFeeAmount(request.getLoanAdministrationFeeAmount());
         lc.setDefaultingPeriod(request.getDefaultingPeriod());
         lc.setMaximumLoanPeriod(request.getMaximumLoanPeriod());
+        lc.setOverdueInterest(request.getOverdueInterestRate());
+        lc.setPenaltyInterest(request.getPenaltyInterestRate());
         lc.setModifiedDate(new Date());
         lc.setStatus(StatusConstants.CREATED);
 
