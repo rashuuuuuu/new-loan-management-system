@@ -1,5 +1,4 @@
 package com.rashmita.accuralsservice.service.AccuralsServiceImpl;
-
 import com.rashmita.accuralsservice.service.AccuralsService;
 import com.rashmita.commoncommon.entity.EmiSchedule;
 import com.rashmita.commoncommon.entity.LoanDetails;
@@ -9,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -26,7 +24,7 @@ public class DailyAccurals {
 
     private static final int DAYS_IN_YEAR = 365;
 
-    @Scheduled(fixedRate = 180000)
+    @Scheduled(fixedRate = 60000)
     @Scheduled(cron = "0 10 2 * * ?", zone = "Asia/Kathmandu")
     public void run() {
         log.info("Daily accrual job triggered at {}", LocalDate.now());
@@ -53,15 +51,14 @@ public class DailyAccurals {
                     loanRepo.save(loan);
                 }
                 LocalDate emiStart = s.getEmiStartDate();
-                if (!today.isBefore(emiStart) && !"PAID".equalsIgnoreCase(s.getStatus())) {
                     double principal = loan.getLoanAmount();
+                    double remainingPrincipal=s.getRemainingAmount();
                     double annualRate = loan.getInterestRate();
-                    double dailyInterest = (principal * annualRate) / (100 * DAYS_IN_YEAR);
+                    double dailyInterest = (remainingPrincipal * annualRate) / (100 * DAYS_IN_YEAR);
                     dailyInterest = round(dailyInterest);
                     accuralsService.saveInterest(
                             loan.getLoanNumber(), s.getId(), today, dailyInterest, s.getEmiMonth()
                     );
-                }
 
                 // Update EMI status to ACTIVE if today >= start date
                 if (!today.isBefore(emiStart) && !"PAID".equalsIgnoreCase(s.getStatus()) && !"OVERDUE".equalsIgnoreCase(s.getStatus())) {

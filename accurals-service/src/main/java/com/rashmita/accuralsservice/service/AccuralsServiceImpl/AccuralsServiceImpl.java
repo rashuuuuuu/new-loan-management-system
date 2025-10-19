@@ -32,7 +32,6 @@ public class AccuralsServiceImpl implements AccuralsService {
         emiInterest.setLoanNumber(loanNumber);
         emiInterest.setEmiId(emiId);
         emiInterest.setEmiMonth(emiMonth);
-
         emiInterestRepository.save(emiInterest);
     }
 
