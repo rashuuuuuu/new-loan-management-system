@@ -51,7 +51,6 @@ public class DailyAccurals {
                     loanRepo.save(loan);
                 }
                 LocalDate emiStart = s.getEmiStartDate();
-                    double principal = loan.getLoanAmount();
                     double remainingPrincipal=s.getRemainingAmount();
                     double annualRate = loan.getInterestRate();
                     double dailyInterest = (remainingPrincipal * annualRate) / (100 * DAYS_IN_YEAR);

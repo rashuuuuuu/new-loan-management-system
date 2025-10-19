@@ -169,10 +169,10 @@ public class TotalPayableImpl implements TotalPayable {
                             .filter(Objects::nonNull)
                             .collect(Collectors.toCollection(TreeSet::new));
 
-                    Map<Integer, Map<String, Double>> emiBreakdown = new LinkedHashMap<>();
+                    Map<Integer, Map<String,Object>> emiBreakdown = new LinkedHashMap<>();
 
                     for (Integer month : allMonths) {
-                        Map<String, Double> breakdown = new HashMap<>();
+                        Map<String, Object> breakdown = new HashMap<>();
 
                         double overdue = overdueList.stream()
                                 .filter(e -> Objects.equals(e.getEmiMonth(), month))
@@ -202,12 +202,21 @@ public class TotalPayableImpl implements TotalPayable {
                                 .mapToDouble(EmiSchedule::getEmiAmount)
                                 .sum();
 
+                        EmiSchedule schedule = scheduleList.stream()
+                                .filter(e -> Objects.equals(e.getEmiMonth(), month))
+                                .findFirst()
+                                .orElse(null);
+
                         breakdown.put("overdue", overdue);
                         breakdown.put("penalty", penalty);
                         breakdown.put("lateFee", lateFee);
                         breakdown.put("interest", interest);
                         breakdown.put("unpaidEmi", unpaid);
                         breakdown.put("total", overdue + penalty + lateFee + interest + unpaid);
+                        if (schedule != null) {
+                            breakdown.put("emiStartDate", schedule.getEmiStartDate());
+                            breakdown.put("emiDate", schedule.getEmiDate());
+                        }
                         emiBreakdown.put(month, breakdown);
                     }
 

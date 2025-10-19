@@ -22,5 +22,7 @@ public class LoanReportDto {
     private double totalAccruals;
     private int emiMonth;
     private String status;
+    private String emiStartDate;
+    private String emiEndDate;
     private Map<Integer, Map<String,Double>> emiSummary;
 }
