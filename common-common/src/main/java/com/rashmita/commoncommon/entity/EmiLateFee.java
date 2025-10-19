@@ -18,4 +18,5 @@ public class EmiLateFee extends AbstractEntity {
     private Long emiId;
     private Double lateFee;
     private LocalDate chargedDate;
+    private int emiMonth;
 }

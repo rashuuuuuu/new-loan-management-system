@@ -16,6 +16,7 @@ import java.time.LocalDate;
 public class EmiInterest extends AbstractEntity {
         private String loanNumber;
         private Long emiId;
+        private int emiMonth;
         private LocalDate accrualDate;
         private Double interestAmount;
     }

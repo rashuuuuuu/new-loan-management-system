@@ -19,4 +19,5 @@ public class EmiOverdue extends AbstractEntity {
     private String loanNumber;
     private LocalDate accrualDate;
     private Double overdueAmount;
+    private int emiMonth;
 }

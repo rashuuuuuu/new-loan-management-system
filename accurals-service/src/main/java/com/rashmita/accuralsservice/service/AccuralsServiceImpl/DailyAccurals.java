@@ -1,4 +1,5 @@
 package com.rashmita.accuralsservice.service.AccuralsServiceImpl;
+
 import com.rashmita.accuralsservice.service.AccuralsService;
 import com.rashmita.commoncommon.entity.EmiSchedule;
 import com.rashmita.commoncommon.entity.LoanDetails;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -24,8 +26,8 @@ public class DailyAccurals {
 
     private static final int DAYS_IN_YEAR = 365;
 
-//    @Scheduled(fixedRate = 60000)
-     @Scheduled(cron = "0 50 5 * * ?", zone = "Asia/Kathmandu")
+    @Scheduled(fixedRate = 180000)
+    @Scheduled(cron = "0 10 2 * * ?", zone = "Asia/Kathmandu")
     public void run() {
         log.info("Daily accrual job triggered at {}", LocalDate.now());
         List<LoanDetails> loans = loanRepo.findByStatusIn(List.of("ACTIVE", "OVERDUE", "DEFAULT"));
@@ -38,7 +40,7 @@ public class DailyAccurals {
                 if (Boolean.TRUE.equals(s.getLastInstallment())) continue;
                 long daysDiff = ChronoUnit.DAYS.between(s.getEmiStartDate(), s.getEmiDate());
                 if (daysDiff > 0) {
-                    s.setStatus("Active");
+                    s.setStatus("ACTIVE");
                     emiRepo.save(s);
                     loanRepo.save(loan);
                 }
@@ -50,16 +52,23 @@ public class DailyAccurals {
                     emiRepo.save(s);
                     loanRepo.save(loan);
                 }
+                LocalDate emiStart = s.getEmiStartDate();
+                if (!today.isBefore(emiStart) && !"PAID".equalsIgnoreCase(s.getStatus())) {
+                    double principal = loan.getLoanAmount();
+                    double annualRate = loan.getInterestRate();
+                    double dailyInterest = (principal * annualRate) / (100 * DAYS_IN_YEAR);
+                    dailyInterest = round(dailyInterest);
+                    accuralsService.saveInterest(
+                            loan.getLoanNumber(), s.getId(), today, dailyInterest, s.getEmiMonth()
+                    );
+                }
 
-                double principal = loan.getLoanAmount();
-                double annualRate = loan.getInterestRate();
-                double dailyInterest = (principal * annualRate) / (100 * DAYS_IN_YEAR);
-                dailyInterest = round(dailyInterest);
-
-                accuralsService.saveInterest(
-                        loan.getLoanNumber(), s.getId(), today, dailyInterest
-                );
-
+                // Update EMI status to ACTIVE if today >= start date
+                if (!today.isBefore(emiStart) && !"PAID".equalsIgnoreCase(s.getStatus()) && !"OVERDUE".equalsIgnoreCase(s.getStatus())) {
+                    s.setStatus("ACTIVE");
+                    emiRepo.save(s);
+                    loanRepo.save(loan);
+                }
                 double paidAmount = (s.getPaidAmount() == null) ? 0.0 : s.getPaidAmount();
                 double unpaidAmount = s.getEmiAmount() - paidAmount;
 
@@ -72,7 +81,7 @@ public class DailyAccurals {
                     loan.setStatus("OVERDUE");
 
                     accuralsService.saveOverDue(
-                            loan.getLoanNumber(), s.getId(), today, dailyOverdue
+                            loan.getLoanNumber(), s.getId(), today, dailyOverdue, s.getEmiMonth()
                     );
 
                     int graceDays = 1;
@@ -80,7 +89,7 @@ public class DailyAccurals {
 
                     if (today.isAfter(penaltyGraceDate)) {
                         double lateFee = loan.getLateFeeCharge();
-                        accuralsService.saveLateFee(loan.getLoanNumber(), s.getId(), today, lateFee);
+                        accuralsService.saveLateFee(loan.getLoanNumber(), s.getId(), today, lateFee, s.getEmiMonth());
                     }
 
                     if (today.isAfter(penaltyGraceDate)) {
@@ -88,7 +97,7 @@ public class DailyAccurals {
                         double dailyPenalty = (unpaidAmount * penaltyRate) / (100 * DAYS_IN_YEAR);
                         dailyPenalty = round(dailyPenalty);
                         accuralsService.savePenalty(
-                                loan.getLoanNumber(), s.getId(), today, dailyPenalty
+                                loan.getLoanNumber(), s.getId(), today, dailyPenalty, s.getEmiMonth()
                         );
                     }
 

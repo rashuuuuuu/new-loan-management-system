@@ -25,44 +25,49 @@ public class AccuralsServiceImpl implements AccuralsService {
     }
 
     @Override
-    public void saveInterest(String loanNumber, Long emiId, LocalDate today, double dailyInterest) {
+    public void saveInterest(String loanNumber, Long emiId, LocalDate today, double dailyInterest,int emiMonth) {
         EmiInterest emiInterest = new EmiInterest();
         emiInterest.setAccrualDate(today);
         emiInterest.setInterestAmount(dailyInterest);
         emiInterest.setLoanNumber(loanNumber);
         emiInterest.setEmiId(emiId);
+        emiInterest.setEmiMonth(emiMonth);
+
         emiInterestRepository.save(emiInterest);
     }
 
     @Override
-    public void savePenalty(String loanNumber, Long emiId, LocalDate today, double penaltyInterest) {
+    public void savePenalty(String loanNumber, Long emiId, LocalDate today, double penaltyInterest,int emiMonth) {
         EmiPenalty emiPenalty = new EmiPenalty();
         emiPenalty.setAccrualDate(today);
         emiPenalty.setPenaltyAmount(penaltyInterest);
         emiPenalty.setLoanNumber(loanNumber);
         emiPenalty.setEmiId(emiId);
+        emiPenalty.setEmiMonth(emiMonth);
         emiPenaltyRepository.save(emiPenalty);
 
     }
 
     @Override
-    public void saveLateFee(String loanNumber, Long emiId, LocalDate today, double lateFee) {
+    public void saveLateFee(String loanNumber, Long emiId, LocalDate today, double lateFee,int emiMonth) {
         EmiLateFee emiLateFee = new EmiLateFee();
         emiLateFee.setLateFee(lateFee);
         emiLateFee.setEmiId(emiId);
         emiLateFee.setChargedDate(today);
         emiLateFee.setLoanNumber(loanNumber);
+        emiLateFee.setEmiMonth(emiMonth);
         emiLateFeeRepository.save(emiLateFee);
 
     }
 
     @Override
-    public void saveOverDue(String loanNumber, Long emiId, LocalDate today, double overdueInterest) {
+    public void saveOverDue(String loanNumber, Long emiId, LocalDate today, double overdueInterest,int emiMonth) {
         EmiOverdue emiOverdue = new EmiOverdue();
         emiOverdue.setAccrualDate(today);
         emiOverdue.setLoanNumber(loanNumber);
         emiOverdue.setEmiId(emiId);
         emiOverdue.setOverdueAmount(overdueInterest);
+        emiOverdue.setEmiMonth(emiMonth);
         emiOverdueRepository.save(emiOverdue);
     }
 }

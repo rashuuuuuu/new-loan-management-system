@@ -43,18 +43,16 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
 
     @Override
     public ServerResponse<?> confirmLoan(LoanConfirmRequest request) {
-        // Retrieve loan book info from Redis
+
+        // Retrieve loan booking info from Redis
         String cacheKey = "loanBook:" + request.getAccountNumber();
         LoanBookResponse loanBookResponse = (LoanBookResponse) redisTemplate.opsForValue().get(cacheKey);
-
         if (loanBookResponse == null) {
             return ResponseUtility.getFailedServerResponse("Loan booking not found or expired. Please complete loan booking first.");
         }
-
         if (!"Booked".equalsIgnoreCase(loanBookResponse.getStatus())) {
             return ResponseUtility.getFailedServerResponse("Loan cannot be confirmed. Current status: " + loanBookResponse.getStatus());
         }
-
         if (!loanBookResponse.getOtp().equals(request.getOtp())) {
             return ResponseUtility.getFailedServerResponse("Invalid OTP.");
         }
@@ -62,7 +60,7 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         // Generate unique 20-character loan number
         String loanNumber = "LN" + UUID.randomUUID().toString().replace("-", "").substring(0, 18).toUpperCase();
 
-        // Fetch loan configuration for the bank
+        // Fetch loan configuration
         LoanConfigurationResponse loanConfig = getLoanConfigurationByBankCode(request);
 
         // Save loan details
@@ -96,47 +94,53 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
 
         List<EmiSchedule> emiEntities = new ArrayList<>();
         List<LoanConfirmResponse.EmiScheduleResponse> emiScheduleResponses = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(request.getPaymentDate());
+
+        LocalDate loanConfirmDate = LocalDate.now(); // Loan confirmation date
+        LocalDate previousEmiDate = LocalDate.parse(request.getPaymentDate()); // 1st EMI payment date
         double remainingPrincipal = principal;
         double monthlyInterestRate = annualInterestRate / 1200;
 
         for (int i = 1; i <= tenureMonths; i++) {
+            LocalDate emiStartDate = (i == 1) ? loanConfirmDate : previousEmiDate;
+            LocalDate emiDate = (i == 1) ? previousEmiDate : previousEmiDate.plusMonths(1);
+
             double interestComponent = remainingPrincipal * monthlyInterestRate;
             double principalComponent = emi - interestComponent;
             remainingPrincipal -= principalComponent;
+
+            // Adjust last installment
             if (i == tenureMonths && remainingPrincipal != 0) {
                 principalComponent += remainingPrincipal;
                 remainingPrincipal = 0;
             }
 
-            LocalDate paymentDate = startDate.plusMonths(i - 1);
-
+            // Save EMI schedule
             EmiSchedule emiEntity = new EmiSchedule();
             emiEntity.setLoanNumber(loanDetail.getLoanNumber());
-            emiEntity.setLoanAmount(loanDetail.getLoanAmount());
+            emiEntity.setLoanAmount(principal);
             emiEntity.setEmiMonth(i);
-            emiEntity.setEmiAmount(emi);
+            emiEntity.setEmiAmount(round(emi));
             emiEntity.setPrincipalComponent(round(principalComponent));
             emiEntity.setInterestComponent(round(interestComponent));
             emiEntity.setRemainingAmount(round(remainingPrincipal));
-            emiEntity.setEmiDate(paymentDate);
-            emiEntity.setEmiStartDate(startDate);
+            emiEntity.setEmiStartDate(emiStartDate);
+            emiEntity.setEmiDate(emiDate);
             emiEntity.setStatus("PENDING");
-            if(i==tenureMonths){
-                emiEntity.setLastInstallment(true);
-            }
+            if (i == tenureMonths) emiEntity.setLastInstallment(true);
             emiEntities.add(emiEntity);
 
-
+            // Response DTO
             LoanConfirmResponse.EmiScheduleResponse emiResp = new LoanConfirmResponse.EmiScheduleResponse();
             emiResp.setEmiMonth(i);
-            emiResp.setEmiAmount(emi);
-            emiResp.setPaymentDate(paymentDate.toString());
-            emiResp.setStartDate(startDate.toString());
+            emiResp.setEmiAmount(round(emi));
+            emiResp.setStartDate(emiStartDate.toString());
+            emiResp.setPaymentDate(emiDate.toString());
             emiResp.setPrincipalComponent(round(principalComponent));
             emiResp.setInterestComponent(round(interestComponent));
             emiResp.setRemainingAmount(round(remainingPrincipal));
             emiScheduleResponses.add(emiResp);
+
+            previousEmiDate = emiDate; // update for next iteration
         }
 
         emiScheduleRepository.saveAll(emiEntities);
@@ -145,7 +149,6 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setLoanNumber(loanDetail.getLoanNumber());
         transactionRequest.setTransactionId(loanDetail.getTransaction_token());
-
         TransactionDetailRequest transaction = new TransactionDetailRequest(
                 loanDetail.getAccountNumber(),
                 "Credit",
@@ -168,10 +171,9 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
 
         return ResponseUtility.getSuccessfulServerResponse(response, "Loan confirmed successfully");
     }
+
     private double calculateEMI(double principal, double annualInterestRate, int totalPeriods) {
-        if (annualInterestRate == 0) {
-            return principal / totalPeriods;
-        }
+        if (annualInterestRate == 0) return principal / totalPeriods;
         double monthlyInterestRate = (annualInterestRate / 100.0) / 12.0;
         return principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, totalPeriods)) /
                 (Math.pow(1 + monthlyInterestRate, totalPeriods) - 1);
@@ -181,16 +183,13 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
-    private LoanConfigurationResponse getLoanConfigurationByBankCode(LoanConfirmRequest loanConfirmRequest) {
-        LoanConfigBankCodeRequest request = new LoanConfigBankCodeRequest();
-        request.setBankCode(loanConfirmRequest.getBankCode());
-
-        ServerResponse<LoanConfigurationResponse> serverResponse = bankClient.getLoanConfigurationByBankCode(request);
-
+    private LoanConfigurationResponse getLoanConfigurationByBankCode(LoanConfirmRequest request) {
+        LoanConfigBankCodeRequest configRequest = new LoanConfigBankCodeRequest();
+        configRequest.setBankCode(request.getBankCode());
+        ServerResponse<LoanConfigurationResponse> serverResponse = bankClient.getLoanConfigurationByBankCode(configRequest);
         if (serverResponse == null || serverResponse.getData() == null) {
-            throw new RuntimeException("Loan configuration not found for bankCode: " + loanConfirmRequest.getBankCode());
+            throw new RuntimeException("Loan configuration not found for bankCode: " + request.getBankCode());
         }
-
         return serverResponse.getData();
     }
 }

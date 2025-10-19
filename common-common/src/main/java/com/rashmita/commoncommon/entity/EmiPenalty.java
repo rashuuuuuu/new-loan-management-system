@@ -17,4 +17,5 @@ public class EmiPenalty extends AbstractEntity{
     private Long emiId;
     private LocalDate accrualDate;
     private Double penaltyAmount;
+    private int emiMonth;
 }
