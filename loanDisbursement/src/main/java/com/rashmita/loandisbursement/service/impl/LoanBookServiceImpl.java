@@ -56,9 +56,6 @@ public class LoanBookServiceImpl implements LoanBookService {
         if (!loanProcessResponse.getTransactionToken().equals(request.getTransactionToken())) {
             return ResponseUtility.getFailedServerResponse("Invalid transaction token.");
         }
-        if (!loanProcessResponse.getOtp().equals(request.getOtp())) {
-            return ResponseUtility.getFailedServerResponse("Invalid OTP.");
-        }
         if (!Objects.equals(
                 loanProcessResponse.getCreditScoreResponse().getAccountNumber(),
                 request.getAccountNumber())) {
@@ -71,6 +68,7 @@ public class LoanBookServiceImpl implements LoanBookService {
         loanBookResponse.setTransactionToken(request.getTransactionToken());
         loanBookResponse.setEmiMonths(request.getEmiMonths());
         loanBookResponse.setEmiAmount(request.getEmiAmount());
+        loanBookResponse.setPaymentDate(request.getPaymentDate());
         loanBookResponse.setStatus("Booked");
         String loanBookKey = "loanBook:" + request.getAccountNumber();
         redisTemplate.opsForValue().set(loanBookKey, loanBookResponse, 10, TimeUnit.MINUTES);

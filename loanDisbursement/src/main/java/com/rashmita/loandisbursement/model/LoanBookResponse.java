@@ -20,7 +20,7 @@ public class LoanBookResponse {
     private String otp;
     private int emiMonths;
     private Double emiAmount;
-    private Date paymentDate;
+    private String paymentDate;
 
 //    @Getter
 //    @Setter

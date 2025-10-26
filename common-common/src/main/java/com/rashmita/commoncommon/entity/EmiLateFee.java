@@ -3,7 +3,6 @@ package com.rashmita.commoncommon.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Entity

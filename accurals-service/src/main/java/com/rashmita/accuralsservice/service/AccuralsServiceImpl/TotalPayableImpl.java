@@ -1,5 +1,4 @@
 package com.rashmita.accuralsservice.service.AccuralsServiceImpl;
-
 import com.rashmita.accuralsservice.service.TotalPayable;
 import com.rashmita.commoncommon.entity.*;
 import com.rashmita.commoncommon.model.CreateTotalAccrual;
@@ -9,7 +8,6 @@ import com.rashmita.commoncommon.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -122,7 +120,7 @@ public class TotalPayableImpl implements TotalPayable {
 //                    dto.setTotalAccruals(totalPayable);
 //                    return dto;
 //                })
-//                .toList(); // no need for distinct if you are mapping per loan
+//                .toList();
 //    }
 
 
@@ -184,7 +182,7 @@ public class TotalPayableImpl implements TotalPayable {
                                 .mapToDouble(EmiPenalty::getPenaltyAmount)
                                 .sum();
 
-                        // Take only one late fee per EMI month
+                        // late fee is charge only once per loan
                         double lateFee = lateFeeList.stream()
                                 .filter(e -> Objects.equals(e.getEmiMonth(), month))
                                 .findFirst()
@@ -219,8 +217,6 @@ public class TotalPayableImpl implements TotalPayable {
                         }
                         emiBreakdown.put(month, breakdown);
                     }
-
-                    // Grand totals
                     double totalOverdue = overdueList.stream().mapToDouble(EmiOverdue::getOverdueAmount).sum();
                     double totalPenalty = penaltyList.stream().mapToDouble(EmiPenalty::getPenaltyAmount).sum();
                     double totalLateFee = lateFeeList.stream().map(EmiLateFee::getLateFee).findFirst().orElse(0.0);
@@ -230,7 +226,6 @@ public class TotalPayableImpl implements TotalPayable {
                             .mapToDouble(EmiSchedule::getEmiAmount)
                             .sum();
                     double totalAccruals = totalOverdue + totalPenalty + totalLateFee + totalInterest + totalUnpaid;
-
                     LoanReportDto dto = new LoanReportDto();
                     dto.setStatus(loan.getStatus());
                     dto.setLoanNumber(loanNumber);
@@ -241,6 +236,7 @@ public class TotalPayableImpl implements TotalPayable {
                     dto.setTotalLateFee(totalLateFee);
                     dto.setTotalInterest(totalInterest);
                     dto.setTotalAccruals(totalAccruals);
+                    dto.setTenure(loan.getTenure());
                     dto.setEmiSummary(emiBreakdown);
 
                     return dto;

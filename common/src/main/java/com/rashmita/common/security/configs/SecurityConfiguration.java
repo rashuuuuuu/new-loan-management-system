@@ -15,7 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
             AuthenticationProvider authenticationProvider
@@ -31,10 +30,7 @@ public class SecurityConfiguration {
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/signup/**", "/auth/login/**","/customer/**","/accruals/**").permitAll() // allow signup/login without token
-//                        .requestMatchers("/bank/**").hasAnyAuthority("CREATE_BANK","MODIFY_BANK","DELETE_BANK","VIEW_BANK","BANK")
-//                        .requestMatchers("/bankuser/**").hasAnyAuthority("BANK_ADMIN","BANK_USER","CREATE_BANK_USER","MODIFY_BANK_USER","DELETE_BANK_USER","VIEW_BANK_USER")
-//                        .requestMatchers("/loanconfiguration/**").hasAnyAuthority("CREATE_LOAN_CONFIGURATION","VIEW_LOAN_CONFIGURATION","MODIFY_LOAN_CONFIGURATION")
+                        .requestMatchers("/auth/signup/**", "/auth/login/**","/customer/**","/accruals/**").permitAll()
                         .requestMatchers("/bank/**").permitAll()
                         .requestMatchers("/loanconfiguration/**").permitAll()
                                 .anyRequest().authenticated()

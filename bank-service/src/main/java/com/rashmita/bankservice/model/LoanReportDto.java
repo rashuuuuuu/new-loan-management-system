@@ -1,4 +1,4 @@
-package com.rashmita.bankservice.mapper;
+package com.rashmita.bankservice.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Map;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,9 +19,7 @@ public class LoanReportDto {
     private double totalPenalty;
     private double totalOverdue;
     private double totalAccruals;
-    private int emiMonth;
+    private int tenure;
     private String status;
-    private String emiStartDate;
-    private String emiEndDate;
-    private Map<Integer, Map<String,Double>> emiSummary;
+    private Map<Integer,Map<String,Object>> emiSummary;
 }

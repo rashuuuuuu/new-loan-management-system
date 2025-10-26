@@ -1,6 +1,6 @@
 package com.rashmita.bankservice.controller;
 import com.rashmita.bankservice.client.AccrualsClient;
-import com.rashmita.bankservice.mapper.LoanReportDto;
+import com.rashmita.bankservice.model.LoanReportDto;
 import com.rashmita.bankservice.model.LoanNumberModel;
 import com.rashmita.common.constants.ApiConstants;
 import com.rashmita.common.model.ServerResponse;

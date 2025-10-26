@@ -1,5 +1,5 @@
 package com.rashmita.bankservice.client;
-import com.rashmita.bankservice.mapper.LoanReportDto;
+import com.rashmita.bankservice.model.LoanReportDto;
 import com.rashmita.bankservice.model.LoanNumberModel;
 import com.rashmita.common.model.ServerResponse;
 import org.springframework.cloud.openfeign.FeignClient;

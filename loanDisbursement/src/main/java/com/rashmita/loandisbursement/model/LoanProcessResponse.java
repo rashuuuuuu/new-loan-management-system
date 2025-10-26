@@ -12,6 +12,5 @@ import lombok.Setter;
 public class LoanProcessResponse {
         private String transactionToken;
         private CreditScoreResponse creditScoreResponse;
-        private String otp;
         private String status;
 }

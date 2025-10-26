@@ -153,9 +153,7 @@ public class LoanProcessServiceImpl implements LoanProcessService {
         LoanProcessResponse loanProcessResponse = new LoanProcessResponse();
         loanProcessResponse.setTransactionToken(UUID.randomUUID().toString());
         loanProcessResponse.setCreditScoreResponse(creditScoreResponse);
-        OtpService otpService = new OtpService();
         loanProcessResponse.setStatus("Processed");
-        loanProcessResponse.setOtp(otpService.generateOtp());
 
         //  Store response in Redis cache (expires in 10 minutes)
         redisTemplate.opsForValue().set(cacheKey, loanProcessResponse, 10, TimeUnit.MINUTES);
