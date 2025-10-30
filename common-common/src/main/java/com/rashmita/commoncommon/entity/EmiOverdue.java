@@ -14,14 +14,11 @@ import java.time.LocalDate;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Table(name = "emi_overdue",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"loan_number", "accrual_date"}))
-
+@Table(name = "emi_overdue")
 @Entity
 public class EmiOverdue extends AbstractEntity {
     private Long emiId;
     private String loanNumber;
-    @Column(name = "accrual_date",unique = true)
     private LocalDate accrualDate;
     private Double overdueAmount;
     private int emiMonth;

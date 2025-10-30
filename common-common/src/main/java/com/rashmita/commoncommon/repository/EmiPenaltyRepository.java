@@ -8,11 +8,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface EmiPenaltyRepository  extends JpaRepository<EmiPenalty, Long> {
+public interface EmiPenaltyRepository extends JpaRepository<EmiPenalty, Long> {
     Boolean existsByLoanNumber(String loanNumber);
+
     List<EmiPenalty> findByLoanNumber(String loanNumber);
 
     boolean existsByLoanNumberAndAccrualDate(String loanNumber, LocalDate accrualDate);
 
     boolean existsByAccrualDate(LocalDate accrualDate);
+
+    boolean existsByEmiIdAndAccrualDate(Long emiId, LocalDate today);
+
+    boolean existsByLoanNumberAndAccrualDateAndEmiMonth(String loanNumber, LocalDate date, int emiId);
+    EmiPenalty findTopByLoanNumberAndEmiIdOrderByAccrualDateDesc(String loanNumber, Long emiId);
 }

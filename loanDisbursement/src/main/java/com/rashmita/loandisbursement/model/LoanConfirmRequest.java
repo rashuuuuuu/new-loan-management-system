@@ -17,5 +17,6 @@ public class LoanConfirmRequest {
     private String otp;
     private String emiMonths;
     private String emiAmount;
-    private String paymentDate;
+    private String emiStartDate;
+    private String emiDate;
 }

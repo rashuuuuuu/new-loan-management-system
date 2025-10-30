@@ -75,7 +75,7 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         loanDetail.setTenure(Integer.parseInt(request.getEmiMonths()));
         loanDetail.setStatus("ACTIVE");
         loanDetail.setCreatedAt(new Date());
-        loanDetail.setStartDate(java.sql.Date.valueOf(request.getPaymentDate()));
+        loanDetail.setStartDate(java.sql.Date.valueOf(request.getEmiStartDate()));
         loanDetail.setLoanAdministrationFeeAmount(loanConfig.getLoanAdministrationFeeAmount());
         loanDetail.setLoanAdministrationFeeRate(loanConfig.getLoanAdministrationFeeRate());
         loanDetail.setInterestRate(loanConfig.getInterestRate());
@@ -95,14 +95,14 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         List<EmiSchedule> emiEntities = new ArrayList<>();
         List<LoanConfirmResponse.EmiScheduleResponse> emiScheduleResponses = new ArrayList<>();
 
-        LocalDate loanConfirmDate = LocalDate.now(); // Loan confirmation date
-        LocalDate previousEmiDate = LocalDate.parse(request.getPaymentDate()); // 1st EMI payment date
+        LocalDate emiStartDate = LocalDate.parse(request.getEmiStartDate()); // from request
+        LocalDate emiDate = LocalDate.parse(request.getEmiDate());           // from request
         double remainingPrincipal = principal;
         double monthlyInterestRate = annualInterestRate / 1200;
 
         for (int i = 1; i <= tenureMonths; i++) {
-            LocalDate emiStartDate = (i == 1) ? loanConfirmDate : previousEmiDate;
-            LocalDate emiDate = (i == 1) ? previousEmiDate : previousEmiDate.plusMonths(1);
+            LocalDate currentEmiStartDate = (i == 1) ? emiStartDate : emiStartDate.plusMonths(i - 1);
+            LocalDate currentEmiDate = (i == 1) ? emiDate : emiDate.plusMonths(i - 1);
 
             double interestComponent = remainingPrincipal * monthlyInterestRate;
             double principalComponent = emi - interestComponent;
@@ -123,8 +123,8 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
             emiEntity.setPrincipalComponent(round(principalComponent));
             emiEntity.setInterestComponent(round(interestComponent));
             emiEntity.setRemainingAmount(round(remainingPrincipal));
-            emiEntity.setEmiStartDate(emiStartDate);
-            emiEntity.setEmiDate(emiDate);
+            emiEntity.setEmiStartDate(currentEmiStartDate);
+            emiEntity.setEmiDate(currentEmiDate);
             emiEntity.setStatus("PENDING");
             if (i == tenureMonths) emiEntity.setLastInstallment(true);
             emiEntities.add(emiEntity);
@@ -133,14 +133,12 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
             LoanConfirmResponse.EmiScheduleResponse emiResp = new LoanConfirmResponse.EmiScheduleResponse();
             emiResp.setEmiMonth(i);
             emiResp.setEmiAmount(round(emi));
-            emiResp.setStartDate(emiStartDate.toString());
-            emiResp.setPaymentDate(emiDate.toString());
+            emiResp.setStartDate(currentEmiStartDate.toString());
+            emiResp.setPaymentDate(currentEmiDate.toString());
             emiResp.setPrincipalComponent(round(principalComponent));
             emiResp.setInterestComponent(round(interestComponent));
             emiResp.setRemainingAmount(round(remainingPrincipal));
             emiScheduleResponses.add(emiResp);
-
-            previousEmiDate = emiDate; // update for next iteration
         }
 
         emiScheduleRepository.saveAll(emiEntities);

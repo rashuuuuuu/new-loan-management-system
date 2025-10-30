@@ -8,8 +8,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "emi_penalty",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"loan_number", "accrual_date"}))
+@Table(name = "emi_penalty")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +17,6 @@ import java.time.LocalDate;
 public class EmiPenalty extends AbstractEntity{
     private String loanNumber;
     private Long emiId;
-    @Column(name = "accrual_date",unique = true)
     private LocalDate accrualDate;
     private Double penaltyAmount;
     private int emiMonth;

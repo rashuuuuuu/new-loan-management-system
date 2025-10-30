@@ -1,6 +1,4 @@
 package com.rashmita.loandisbursement.controller;
-
-import com.rashmita.commoncommon.model.LoanDetailResponse;
 import com.rashmita.commoncommon.model.ServerResponse;
 import com.rashmita.loandisbursement.service.LoanDetailService;
 import lombok.AllArgsConstructor;
