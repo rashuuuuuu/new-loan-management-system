@@ -9,7 +9,9 @@ public interface TotalPayable {
     double calculateTotalPenalty(String loanNumber);
     double calculateTotalLateFee(String loanNumber);
     double calculateTotalInterest(String loanNumber);
-    double calculateTotalPayable(String loanNumber);
+//    double calculateTotalPayable(String loanNumber);
     List<LoanReportDto> getAllReport();
     CreateTotalAccrual calculateAccrualsByLoanNumber(LoanNumberModel loanNumber);
+    String totalPayablePerMonth(LoanNumberModel loanNumber);
+
 }

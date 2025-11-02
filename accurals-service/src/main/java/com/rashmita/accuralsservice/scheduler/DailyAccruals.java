@@ -1,12 +1,15 @@
 package com.rashmita.accuralsservice.scheduler;
 
 import com.rashmita.accuralsservice.service.AccuralsService;
-import com.rashmita.commoncommon.entity.DailyJobLog;
+import com.rashmita.accuralsservice.service.AccuralsServiceImpl.TotalPayableImpl;
+import com.rashmita.accuralsservice.service.PrepaymentService;
+import com.rashmita.accuralsservice.service.TotalPayable;
 import com.rashmita.commoncommon.entity.EmiSchedule;
 import com.rashmita.commoncommon.entity.LoanDetails;
 import com.rashmita.commoncommon.repository.DailyJobLogRepository;
 import com.rashmita.commoncommon.repository.EmiScheduleRepository;
 import com.rashmita.commoncommon.repository.LoanDetailsRepository;
+import com.rashmita.commoncommon.repository.TotalPayableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,13 +22,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DailyAccruals {
-
     private final LoanDetailsRepository loanRepo;
     private final EmiScheduleRepository emiRepo;
     private final AccuralsService accuralsService;
     private final DailyJobLogRepository dailyJobLogRepo;
+    private final TotalPayable totalPayableService;
     private static final int DAYS_IN_YEAR = 365;
     private static final String JOB_NAME = "accruals_calculation";
+    private final TotalPayableRepository totalPayableRepository;
+    private final TotalPayableImpl totalPayableServiceImpl;
+    private final PrepaymentService prepaymentService;
+
 
     @Scheduled(fixedRate = 60000) // for testing (every minute)
 //     @Scheduled(cron = "0 27 11 * * ?", zone = "Asia/Kathmandu") // 3 AM daily
@@ -33,10 +40,10 @@ public class DailyAccruals {
         LocalDate today = LocalDate.now();
         log.info("Daily accrual job triggered at {}", today);
 
-        if (dailyJobLogRepo.existsByJobNameAndDate(JOB_NAME, today)) {
-            log.info("Daily accrual job already triggered for {}", today);
-            return;
-        }else{
+//        if (dailyJobLogRepo.existsByJobNameAndDate(JOB_NAME, today)) {
+//            log.info("Daily accrual job already triggered for {}", today);
+//            return;
+//        } else {
         List<LoanDetails> loans = loanRepo.findByStatusIn(List.of("ACTIVE", "OVERDUE", "DEFAULT"));
 
         for (LoanDetails loan : loans) {
@@ -49,13 +56,11 @@ public class DailyAccruals {
                     s.setStatus("ACTIVE");
                     emiRepo.save(s);
                 }
-
                 LocalDate accrualDate = s.getEmiStartDate();
                 LocalDate lastAccrual = accuralsService.getLastAccrualDate(loan.getLoanNumber(), s.getId());
                 if (lastAccrual != null) {
                     accrualDate = lastAccrual.plusDays(1);
                 }
-
                 while (!accrualDate.isAfter(today)) {
                     double remainingPrincipal = s.getRemainingAmount();
                     double dailyInterest = (remainingPrincipal * loan.getInterestRate()) / (100 * DAYS_IN_YEAR);
@@ -66,9 +71,9 @@ public class DailyAccruals {
                     }
 
                     double paidAmount = (s.getPaidAmount() == null) ? 0.0 : s.getPaidAmount();
-                    double unpaidAmount = s.getEmiAmount() - paidAmount;
-
-                    if (unpaidAmount > 0) {
+                    double unpaidAmount = loan.getLoanAmount() - paidAmount;
+                    LocalDate overdueStart = s.getEmiDate().plusDays(1);
+                    if (unpaidAmount > 0 && !accrualDate.isBefore(overdueStart)) {
                         if (!accuralsService.existsOverdue(loan.getLoanNumber(), accrualDate, s.getId().intValue())) {
                             double dailyOverdue = (unpaidAmount * loan.getOverdueInterest()) / (100 * DAYS_IN_YEAR);
                             dailyOverdue = round(dailyOverdue);
@@ -94,22 +99,23 @@ public class DailyAccruals {
                             loan.setStatus("OVERDUE");
                         }
                     }
-
                     accrualDate = accrualDate.plusDays(1);
                 }
                 emiRepo.save(s);
                 loanRepo.save(loan);
+
+                totalPayableServiceImpl.totalPayablePerMonth(loan.getLoanNumber());
             }
         }
-            DailyJobLog dailyJobLog = new DailyJobLog();
-            dailyJobLog.setJobName(JOB_NAME);
-            dailyJobLog.setDate(today);
-            dailyJobLogRepo.save(dailyJobLog);
+//            DailyJobLog dailyJobLog = new DailyJobLog();
+//            dailyJobLog.setJobName(JOB_NAME);
+//            dailyJobLog.setDate(today);
+//            dailyJobLogRepo.save(dailyJobLog);
+//    }
 
-        }
-}
+    }
 
-private double round(double value) {
-    return Math.round(value * 100.0) / 100.0;
-}
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
 }

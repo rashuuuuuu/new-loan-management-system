@@ -1,6 +1,5 @@
 package com.rashmita.commoncommon.repository;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import com.rashmita.commoncommon.entity.EmiInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -21,4 +20,6 @@ public interface EmiInterestRepository extends JpaRepository<EmiInterest, Long> 
     boolean existsByLoanNumberAndAccrualDateAndEmiMonth(String loanNumber, LocalDate date, int emiId);
 
     EmiInterest findTopByLoanNumberAndEmiIdOrderByAccrualDateDesc(String loanNumber, Long emiId);
+
+    Optional<EmiInterest> findByLoanNumberAndAccrualDateAndEmiMonth(String loanNumber, LocalDate today, int emiMonth);
 }

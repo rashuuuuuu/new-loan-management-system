@@ -19,4 +19,6 @@ public class LoanConfigurationResponse {
     private Date modifiedDate;
     private int penaltyInterest;
     private int overdueInterest;
+    private int prepaymentPercentage;
+    private int prepaymentFlat;
 }

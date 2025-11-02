@@ -113,7 +113,6 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
                 principalComponent += remainingPrincipal;
                 remainingPrincipal = 0;
             }
-
             // Save EMI schedule
             EmiSchedule emiEntity = new EmiSchedule();
             emiEntity.setLoanNumber(loanDetail.getLoanNumber());

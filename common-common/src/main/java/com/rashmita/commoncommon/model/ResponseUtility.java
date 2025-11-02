@@ -120,7 +120,7 @@ public class ResponseUtility {
         return serverResponse;
     }
 
-    public static ServerResponse getFailedServerResponse(String message) {
+    public static ServerResponse<Object> getFailedServerResponse(String message) {
         return ServerResponse.builder()
                 .success(false)
                 .message(message)

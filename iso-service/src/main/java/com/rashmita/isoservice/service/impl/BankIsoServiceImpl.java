@@ -1,9 +1,12 @@
 package com.rashmita.isoservice.service.impl;
 
+import com.rashmita.commoncommon.model.SettlementRequest;
 import com.rashmita.commoncommon.model.TransactionRequest;
 import com.rashmita.isoservice.entity.BankMoney;
+import com.rashmita.isoservice.entity.SettlementDetail;
 import com.rashmita.isoservice.entity.TransactionDetail;
 import com.rashmita.isoservice.repository.BankMoneyRepository;
+import com.rashmita.isoservice.repository.SettlementDetailRepository;
 import com.rashmita.isoservice.repository.TransactionDetailRepository;
 import com.rashmita.isoservice.service.BankIsoService;
 import jakarta.transaction.Transactional;
@@ -22,26 +25,19 @@ public class BankIsoServiceImpl implements BankIsoService {
 
     private final TransactionDetailRepository transactionDetailRepository;
     private final BankMoneyRepository bankMoneyRepository;
+    private final SettlementDetailRepository settlementDetailRepository;
 
     @Override
     @Transactional
     public void processMultiTransaction(TransactionRequest request) {
-        // Source account (could come from request too)
         String fromAccount = "ACC10001";
-
-        // Fetch source bank account
         BankMoney bankAccount = bankMoneyRepository.findByAccountNumber(fromAccount)
                 .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + fromAccount));
-
-        // Prepare to process
         BigDecimal totalTransfer = BigDecimal.ZERO;
         List<TransactionDetail> transactionDetails = new ArrayList<>();
-
-        // Build transaction records
         for (var t : request.getTransactions()) {
             BigDecimal amount = BigDecimal.valueOf(t.getAmount());
             totalTransfer = totalTransfer.add(amount);
-
             TransactionDetail detail = new TransactionDetail();
             detail.setLoanNumber(request.getLoanNumber());
             detail.setTransactionId(request.getTransactionId());
@@ -51,21 +47,84 @@ public class BankIsoServiceImpl implements BankIsoService {
             detail.setParticularRemarks(t.getParticularRemarks());
             detail.setValueDate(t.getValueDate());
             detail.setTotalAmount(amount);
+            detail.setStatus("Success");
             transactionDetails.add(detail);
         }
-
-        // Validate sufficient balance
         BigDecimal currentBalance = bankAccount.getTotalBalance();
         if (currentBalance.compareTo(totalTransfer) < 0) {
             throw new IllegalStateException("Insufficient balance in account: " + fromAccount);
         }
-
         bankAccount.setTransferAmount(totalTransfer);
         bankAccount.setTotalBalance(currentBalance.subtract(totalTransfer));
         bankMoneyRepository.save(bankAccount);
         transactionDetailRepository.saveAll(transactionDetails);
 
-        log.info("✅ Successfully processed {} transactions. Total transferred: {} from account {}",
+        log.info(" Successfully processed {} transactions. Total transferred: {} from account {}",
                 transactionDetails.size(), totalTransfer, fromAccount);
+    }
+    public void isoSettlement(SettlementRequest request) {
+        String toAccount = "ACC10001";
+        BankMoney bankAccount = bankMoneyRepository.findByAccountNumber(toAccount)
+                .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + toAccount));
+        BigDecimal totalTransfer = BigDecimal.ZERO;
+        List<SettlementDetail> settlementDetails = new ArrayList<>();
+        for (var t : request.getTransactions()) {
+            BigDecimal amount = BigDecimal.valueOf(t.getAmount());
+            totalTransfer = totalTransfer.add(amount);
+            SettlementDetail detail = new SettlementDetail();
+            detail.setLoanNumber(request.getLoanNumber());
+            detail.setTransactionId(request.getTransactionId());
+            detail.setToAccount(toAccount);
+            detail.setAccountNumber(t.getAccountNumber());
+            detail.setTransferAmount(amount);
+            detail.setParticularRemarks(t.getParticularRemarks());
+            detail.setValueDate(t.getValueDate());
+            detail.setTotalAmount(amount);
+            detail.setStatus("Success");
+            detail.setEmiMonth(request.getEmiMonth());
+            settlementDetails.add(detail);
+        }
+        BigDecimal currentBalance = BigDecimal.valueOf(request.getAmount());
+        if (currentBalance.compareTo(totalTransfer) < 0) {
+            throw new IllegalStateException("Insufficient balance in account number: " + request.getAccountNumber());
+        }
+        bankAccount.setTransferAmount(totalTransfer);
+        bankAccount.setTotalBalance(currentBalance.subtract(totalTransfer));
+        bankMoneyRepository.save(bankAccount);
+        settlementDetailRepository.saveAll(settlementDetails);
+        log.info(" Successfully Settled {} transactions. Total transferred: {} from account {}",
+                settlementDetails.size(), totalTransfer, request.getAccountNumber());
+    }
+    public void isoPrepayment(TransactionRequest request){
+    String toAccount = "ACC10001";
+    BankMoney bankAccount = bankMoneyRepository.findByAccountNumber(toAccount)
+            .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + toAccount));
+    BigDecimal totalTransfer = BigDecimal.ZERO;
+    List<TransactionDetail> transactionDetails = new ArrayList<>();
+        for (var t : request.getTransactions()) {
+            BigDecimal amount = BigDecimal.valueOf(t.getAmount());
+            totalTransfer = totalTransfer.add(amount);
+            TransactionDetail detail = new TransactionDetail();
+            detail.setLoanNumber(request.getLoanNumber());
+            detail.setTransactionId(request.getTransactionId());
+            detail.setToAccount(toAccount);
+            detail.setAccountNumber(t.getAccountNumber());
+            detail.setTransferAmount(amount);
+            detail.setParticularRemarks(t.getParticularRemarks());
+            detail.setValueDate(t.getValueDate());
+            detail.setTotalAmount(amount);
+            detail.setStatus("Success");
+            transactionDetails.add(detail);
+    }
+        BigDecimal currentBalance = BigDecimal.valueOf(request.getTransactions().get(0).getAmount());
+        if (currentBalance.compareTo(totalTransfer) < 0) {
+            throw new IllegalStateException("Insufficient balance in account number: " + request.getTransactions().get(0).getAccountNumber());
+        }
+        bankAccount.setTransferAmount(totalTransfer);
+        bankAccount.setTotalBalance(currentBalance.subtract(totalTransfer));
+        bankMoneyRepository.save(bankAccount);
+        transactionDetailRepository.saveAll(transactionDetails);
+        log.info(" Successfully Settled {} transactions. Total transferred: {} ",
+                transactionDetails.size(), totalTransfer);
     }
 }

@@ -76,5 +76,4 @@ public class LoanDetails extends AbstractEntity {
     @Column(name="overdue_interest")
     private int overdueInterest;
 
-
 }

@@ -6,10 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LoanDetailsRepository extends JpaRepository<LoanDetails, Long> {
     List<LoanDetails> findByStatusIn(List<String> active);
+
     @Query("SELECT l FROM LoanDetails l")
     List<LoanDetails> getAllLoanDetails();
+
+    Optional<LoanDetails> findByLoanNumber(String loanNumber);
 }

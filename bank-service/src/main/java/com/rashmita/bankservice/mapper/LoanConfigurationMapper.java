@@ -46,6 +46,8 @@ public class LoanConfigurationMapper {
         lc.setMaximumLoanPeriod(request.getMaximumLoanPeriod());
         lc.setOverdueInterest(request.getOverdueInterestRate());
         lc.setPenaltyInterest(request.getPenaltyInterestRate());
+        lc.setPrepaymentChargeFlat(request.getPrepaymentFlat());
+        lc.setPrepaymentChargePercentage(request.getPrepaymentPercentage());
         lc.setModifiedDate(new Date());
         lc.setStatus(StatusConstants.CREATED);
 

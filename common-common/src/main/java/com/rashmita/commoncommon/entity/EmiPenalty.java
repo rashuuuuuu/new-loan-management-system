@@ -8,16 +8,18 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "emi_penalty")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class EmiPenalty extends AbstractEntity{
+    @Column(name="loan_number")
     private String loanNumber;
     private Long emiId;
+    @Column(name="accrual_date")
     private LocalDate accrualDate;
     private Double penaltyAmount;
+    @Column(name="emi_month")
     private int emiMonth;
 }

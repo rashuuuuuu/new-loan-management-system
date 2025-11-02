@@ -41,7 +41,6 @@ public class LoanConfiguration extends AbstractEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
 
-
     @Column(name="overdue_interest")
     private int overdueInterest;
 
@@ -55,4 +54,12 @@ public class LoanConfiguration extends AbstractEntity {
     @OneToOne
     @JoinColumn(name = "bank_id", referencedColumnName = "id", nullable = false)
     private Bank bank;
+
+    @Column(name="prepayment_charge_percentage")
+    private int prepaymentChargePercentage;
+
+    @Column(name="prepayment_charge_flat")
+    private int prepaymentChargeFlat;
+
+
 }

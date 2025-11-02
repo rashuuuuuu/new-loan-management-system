@@ -1,4 +1,5 @@
 package com.rashmita.isoservice.controller;
+import com.rashmita.commoncommon.model.SettlementRequest;
 import com.rashmita.commoncommon.model.TransactionRequest;
 import com.rashmita.isoservice.service.BankIsoService;
 import org.springframework.http.ResponseEntity;
@@ -20,4 +21,16 @@ public class BankIsoController {
         bankIsoService.processMultiTransaction(request);
         return ResponseEntity.ok("Transaction processed successfully");
     }
+
+    @PostMapping("/settle")
+    public ResponseEntity<String> isoSettlement(@RequestBody SettlementRequest request) {
+        bankIsoService.isoSettlement(request);
+        return ResponseEntity.ok("Settlement processed successfully");
+    }
+    @PostMapping("/prepayment")
+    public ResponseEntity<String> isoPrepayment(@RequestBody TransactionRequest request) {
+        bankIsoService.isoPrepayment(request);
+        return ResponseEntity.ok("Prepayment processed successfully");
+    }
+
 }

@@ -16,4 +16,5 @@ public class CustomerResponse {
     private String customerNumber;
     private String accountNumber;
     private String bankCode;
+    private Double amount;
 }

@@ -22,4 +22,5 @@ public interface EmiLateFeeRepository  extends JpaRepository<EmiLateFee, Long> {
     boolean existsByLoanNumberAndAccrualDateAndEmiMonth(String loanNumber, LocalDate date,int emiId);
     EmiLateFee findTopByLoanNumberAndEmiIdOrderByAccrualDateDesc(String loanNumber, Long emiId);
 
+    Optional<EmiLateFee> findByLoanNumberAndAccrualDateAndEmiMonth(String loanNumber, LocalDate today, int emiMonth);
 }

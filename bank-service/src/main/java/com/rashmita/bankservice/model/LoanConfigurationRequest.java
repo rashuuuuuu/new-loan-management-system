@@ -20,5 +20,7 @@ public class LoanConfigurationRequest {
     private BankIdRequest bankIdRequest;
     private int overdueInterestRate;
     private int penaltyInterestRate;
+    private int prepaymentPercentage;
+    private int prepaymentFlat;
 
 }

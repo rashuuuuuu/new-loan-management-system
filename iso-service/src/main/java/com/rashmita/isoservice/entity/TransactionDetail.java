@@ -25,6 +25,7 @@ public class TransactionDetail extends AbstractEntity {
     private String transactionId;
     private String accountNumber;
     private String fromAccount;
+    private String toAccount;
     @Enumerated(EnumType.STRING)
     private TransactionType type;
     private BigDecimal totalAmount;
@@ -32,4 +33,5 @@ public class TransactionDetail extends AbstractEntity {
     private String particularRemarks;
     private LocalDate valueDate;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private String status;
 }
