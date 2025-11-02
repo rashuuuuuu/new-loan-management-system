@@ -2,7 +2,6 @@ package com.rashmita.accuralsservice.scheduler;
 
 import com.rashmita.accuralsservice.service.AccuralsService;
 import com.rashmita.accuralsservice.service.AccuralsServiceImpl.TotalPayableImpl;
-import com.rashmita.accuralsservice.service.PrepaymentService;
 import com.rashmita.accuralsservice.service.TotalPayable;
 import com.rashmita.commoncommon.entity.EmiSchedule;
 import com.rashmita.commoncommon.entity.LoanDetails;
@@ -31,9 +30,6 @@ public class DailyAccruals {
     private static final String JOB_NAME = "accruals_calculation";
     private final TotalPayableRepository totalPayableRepository;
     private final TotalPayableImpl totalPayableServiceImpl;
-    private final PrepaymentService prepaymentService;
-
-
     @Scheduled(fixedRate = 60000) // for testing (every minute)
 //     @Scheduled(cron = "0 27 11 * * ?", zone = "Asia/Kathmandu") // 3 AM daily
     public void run() {
@@ -103,7 +99,6 @@ public class DailyAccruals {
                 }
                 emiRepo.save(s);
                 loanRepo.save(loan);
-
                 totalPayableServiceImpl.totalPayablePerMonth(loan.getLoanNumber());
             }
         }

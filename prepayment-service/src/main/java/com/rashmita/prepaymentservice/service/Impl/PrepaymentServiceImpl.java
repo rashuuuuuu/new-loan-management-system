@@ -27,7 +27,6 @@ public class PrepaymentServiceImpl implements PrepaymentService {
     private final PrepaymentDetailsRepository prepaymentDetailsRepository;
     private final IsoClient isoClient;
 
-
     public PrepaymentServiceImpl(BankClient bankClient, LoanDetailsRepository loanDetailsRepository, PrepaymentInquiryRepository prepaymentRepository, ModelMapper modelMapper, TotalPayableRepository totalPayableRepository, PrepaymentLogRepository prepaymentLogRepository, EmiInterestRepository emiInterestRepository, PrepaymentInquiryRepository prepaymentInquiryRepository, PrepaymentDetailsRepository prepaymentDetailsRepository, IsoClient isoClient) {
         this.bankClient = bankClient;
         this.loanDetailsRepository = loanDetailsRepository;
@@ -94,7 +93,6 @@ public class PrepaymentServiceImpl implements PrepaymentService {
         if (!prepaymentInquiry.getPayableAmount().equals(prepaymentRequest.getPaymentAmount())) {
             ResponseUtility.getFailedServerResponse("Inquiry balance and apply balance must match for prepayment");
         }
-
         PrepaymentDetails prepaymentDetails = new PrepaymentDetails();
         prepaymentDetails.setPrepaymentDate(prepaymentDate);
         prepaymentDetails.setLoanNumber(prepaymentRequest.getLoanNumber());

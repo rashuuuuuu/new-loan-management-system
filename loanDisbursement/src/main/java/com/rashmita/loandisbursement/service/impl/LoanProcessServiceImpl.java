@@ -124,7 +124,7 @@ public class LoanProcessServiceImpl implements LoanProcessService {
     }
 
     @Override
-    public ServerResponse<LoanProcessResponse> loanProcess(LoanProcessRequest loanProcessRequest) {
+    public ServerResponse<Object> loanProcess(LoanProcessRequest loanProcessRequest) {
         String cacheKey = "loanProcess:" + loanProcessRequest.getCustomerNumber();
 
         LoanProcessResponse cachedResponse = (LoanProcessResponse) redisTemplate.opsForValue().get(cacheKey);

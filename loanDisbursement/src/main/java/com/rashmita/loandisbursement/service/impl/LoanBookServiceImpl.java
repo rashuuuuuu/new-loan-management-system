@@ -32,7 +32,7 @@ public class LoanBookServiceImpl implements LoanBookService {
     }
 
     @Override
-    public ServerResponse<LoanBookResponse> loanBook(LoanBookRequest request) {
+    public ServerResponse<Object> loanBook(LoanBookRequest request) {
         String loanProcessKey = "loanProcess:" + request.getCustomerNumber();
         CreditScoreByAccountNumber creditScoreByAccountNumber = new CreditScoreByAccountNumber();
         creditScoreByAccountNumber.setAccountNumber(request.getAccountNumber());

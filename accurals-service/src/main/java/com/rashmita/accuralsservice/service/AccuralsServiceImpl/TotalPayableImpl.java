@@ -185,7 +185,7 @@ public class TotalPayableImpl implements TotalPayable {
         return "total accrued updated per month";
     }
 
-//
+    //
 //    public void totalPayablePerMonth(String loanNumber) {
 //        List<EmiSchedule> emiScheduleList = emiScheduleRepository.findByLoanNumber(loanNumber);
 //        if (emiScheduleList == null || emiScheduleList.isEmpty()) {
@@ -250,74 +250,71 @@ public class TotalPayableImpl implements TotalPayable {
 //        log.info("Total payable updated for loan {}", loanNumber);
 //    }
 //
-public void totalPayablePerMonth(String loanNumber) {
-    List<EmiSchedule> emiScheduleList = emiScheduleRepository.findByLoanNumber(loanNumber);
-    Optional<LoanDetails> loanDetails = loanDetailsRepository.findByLoanNumber(loanNumber);
+    public void totalPayablePerMonth(String loanNumber) {
+        List<EmiSchedule> emiScheduleList = emiScheduleRepository.findByLoanNumber(loanNumber);
+        Optional<LoanDetails> loanDetails = loanDetailsRepository.findByLoanNumber(loanNumber);
 
-    if (loanDetails.isEmpty() || emiScheduleList.isEmpty()) {
-        return;
+        if (loanDetails.isEmpty() || emiScheduleList.isEmpty()) {
+            return;
+        }
+        int tenureMonth = loanDetails.get().getTenure();
+        List<TotalPayableEntity> totalPayables = new ArrayList<>();
+        Double calculatedEmiOverdue = 0.0;
+        Double calculatedEmiPenalty = 0.0;
+        Double calculatedEmiLateFee = 0.0;
+        for (int i = 0; i < tenureMonth; i++) {
+            EmiSchedule schedule = emiScheduleList.get(i);
+            TotalPayableEntity totalPayableEntity = totalPayableRepository
+                    .findByLoanNumberAndTenure(loanNumber, i + 1) // tenure is 1-indexed
+                    .orElse(new TotalPayableEntity());
+            totalPayableEntity.setLoanNumber(loanNumber);
+            totalPayableEntity.setTenure(i + 1);
+            totalPayableEntity.setEmiDate(schedule.getEmiDate());
+            totalPayableEntity.setStatus(schedule.getStatus());
+            totalPayableEntity.setEmiAmount(schedule.getEmiAmount());
+            totalPayableEntity.setPayablePrincipal(schedule.getPrincipalComponent());
+            totalPayableEntity.setPayableInterest(calculateTotalInterestPerMonth(loanNumber, i + 1));
+            totalPayableEntity.setPayableLateFee(calculatedEmiLateFee);
+            totalPayableEntity.setPayableOverdue(calculatedEmiOverdue);
+            totalPayableEntity.setPayablePenalty(calculatedEmiPenalty);
+            calculatedEmiLateFee = calculateTotalLateFeePerMonth(loanNumber, i + 1);
+            calculatedEmiOverdue = calculateTotalOverduePerMonth(loanNumber, i + 1);
+            calculatedEmiPenalty = calculateTotalPenaltyPerMonth(loanNumber, i + 1);
+            if (Boolean.TRUE.equals(schedule.getLastInstallment())) {
+                Double payablePenalty = calculateTotalPenaltyPerMonth(loanNumber, tenureMonth - 1)
+                        + calculateTotalPenaltyPerMonth(loanNumber, tenureMonth);
+                Double payableInterest = calculateTotalInterestPerMonth(loanNumber, tenureMonth);
+                Double payableLateFee = calculateTotalLateFeePerMonth(loanNumber, tenureMonth - 1)
+                        + calculateTotalLateFeePerMonth(loanNumber, tenureMonth);
+                Double payableOverdue = calculateTotalOverduePerMonth(loanNumber, tenureMonth - 1)
+                        + calculateTotalOverduePerMonth(loanNumber, tenureMonth);
+                totalPayableEntity.setPayablePenalty(payablePenalty);
+                totalPayableEntity.setPayableInterest(payableInterest);
+                totalPayableEntity.setPayableLateFee(payableLateFee);
+                totalPayableEntity.setPayableOverdue(payableOverdue);
+            }
+            double totalPayable = totalPayableEntity.getPayablePrincipal()
+                    + totalPayableEntity.getPayableInterest()
+                    + totalPayableEntity.getPayableLateFee()
+                    + totalPayableEntity.getPayableOverdue()
+                    + (totalPayableEntity.getPayablePenalty() != null
+                    ? totalPayableEntity.getPayablePenalty() : 0.0);
+            totalPayableEntity.setTotalPayable(totalPayable);
+            if (totalPayableEntity.getPaidInterest() == null) totalPayableEntity.setPaidInterest(0.0);
+            if (totalPayableEntity.getPaidOverdue() == null) totalPayableEntity.setPaidOverdue(0.0);
+            if (totalPayableEntity.getPaidLateFee() == null) totalPayableEntity.setPaidLateFee(0.0);
+            if (totalPayableEntity.getPaidPenalty() == null) totalPayableEntity.setPaidPenalty(0.0);
+            if (totalPayableEntity.getPaidPrincipal() == null) totalPayableEntity.setPaidPrincipal(0.0);
+            if (totalPayableEntity.getTotalPayable() == 0.0) {
+                totalPayableEntity.setStatus("PAID");
+            } else {
+                totalPayableEntity.setStatus("UNPAID");
+            }
+            totalPayables.add(totalPayableEntity);
+        }
+        log.info("total payable updated successfully");
+        totalPayableRepository.saveAll(totalPayables);
     }
-    int tenureMonth = loanDetails.get().getTenure();
-    List<TotalPayableEntity> totalPayables = new ArrayList<>();
-
-    for (int i = 0; i < tenureMonth; i++) {
-        EmiSchedule schedule = emiScheduleList.get(i);
-        TotalPayableEntity totalPayableEntity = totalPayableRepository
-                .findByLoanNumberAndTenure(loanNumber, i + 1)
-                .orElse(new TotalPayableEntity());
-
-        totalPayableEntity.setLoanNumber(loanNumber);
-        totalPayableEntity.setTenure(i + 1);
-        totalPayableEntity.setEmiDate(schedule.getEmiDate());
-        totalPayableEntity.setStatus(schedule.getStatus());
-        totalPayableEntity.setEmiAmount(schedule.getEmiAmount());
-        totalPayableEntity.setPayablePrincipal(schedule.getPrincipalComponent());
-        totalPayableEntity.setPayableInterest(calculateTotalInterestPerMonth(loanNumber, totalPayableEntity.getTenure()));
-        totalPayableEntity.setPayableLateFee(calculateTotalLateFeePerMonth(loanNumber, i -1 ));
-        totalPayableEntity.setPayableOverdue(calculateTotalOverduePerMonth(loanNumber, i -1 ));
-        totalPayableEntity.setPayablePenalty(calculateTotalPenaltyPerMonth(loanNumber, i - 1));
-
-        if (tenureMonth == 1) {
-            totalPayableEntity.setPayableInterest(calculateTotalInterestPerMonth(loanNumber,totalPayableEntity.getTenure()));
-            totalPayableEntity.setPayablePenalty(0.0);
-            totalPayableEntity.setPayableLateFee(0.0);
-            totalPayableEntity.setPayableOverdue(0.0);
-        }
-        if (Boolean.TRUE.equals(schedule.getLastInstallment())) {
-            Double payablePenalty = calculateTotalPenaltyPerMonth(loanNumber, tenureMonth - 1)
-                    + calculateTotalPenaltyPerMonth(loanNumber, tenureMonth);
-            Double payableInterest = calculateTotalInterestPerMonth(loanNumber, totalPayableEntity.getTenure());
-            Double payableLateFee = calculateTotalLateFeePerMonth(loanNumber, tenureMonth - 1)
-                    + calculateTotalLateFeePerMonth(loanNumber, tenureMonth);
-            Double payableOverdue = calculateTotalOverduePerMonth(loanNumber, tenureMonth - 1)
-                    + calculateTotalOverduePerMonth(loanNumber, tenureMonth);
-            totalPayableEntity.setPayablePenalty(payablePenalty);
-            totalPayableEntity.setPayableInterest(payableInterest);
-            totalPayableEntity.setPayableLateFee(payableLateFee);
-            totalPayableEntity.setPayableOverdue(payableOverdue);
-        }
-        double totalPayable = totalPayableEntity.getPayablePrincipal()
-                + totalPayableEntity.getPayableInterest()
-                + totalPayableEntity.getPayableLateFee()
-                + totalPayableEntity.getPayableOverdue()
-                + (totalPayableEntity.getPayablePenalty() != null
-                ? totalPayableEntity.getPayablePenalty() : 0.0);
-
-        totalPayableEntity.setTotalPayable(totalPayable);
-        if (totalPayableEntity.getPaidInterest() == null) totalPayableEntity.setPaidInterest(0.0);
-        if (totalPayableEntity.getPaidOverdue() == null) totalPayableEntity.setPaidOverdue(0.0);
-        if (totalPayableEntity.getPaidLateFee() == null) totalPayableEntity.setPaidLateFee(0.0);
-        if (totalPayableEntity.getPaidPenalty() == null) totalPayableEntity.setPaidPenalty(0.0);
-        if (totalPayableEntity.getPaidPrincipal() == null) totalPayableEntity.setPaidPrincipal(0.0);
-        if (totalPayableEntity.getTotalPayable() == 0.0) {
-            totalPayableEntity.setStatus("PAID");
-        } else {
-            totalPayableEntity.setStatus("UNPAID");
-        }
-        totalPayables.add(totalPayableEntity);
-    }
-    totalPayableRepository.saveAll(totalPayables);
-}
 
 
     public String totalPayablePerMonth(LoanNumberModel loanNumber) {

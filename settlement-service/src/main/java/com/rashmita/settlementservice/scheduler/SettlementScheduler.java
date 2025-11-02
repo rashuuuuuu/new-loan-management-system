@@ -61,7 +61,6 @@ public class SettlementScheduler {
                 if (emiDate.isAfter(LocalDate.now())) continue;
 
                 while (emiDate.isBefore(LocalDate.now())) {
-
                     TransactionDetailRequest transactionDetailRequest = new TransactionDetailRequest(
                             loanDetail.getAccountNumber(),
                             "Debit",
