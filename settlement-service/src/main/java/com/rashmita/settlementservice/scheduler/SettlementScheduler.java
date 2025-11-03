@@ -23,6 +23,7 @@ import java.util.List;
 @Component
 @Slf4j
 public class SettlementScheduler {
+
     private final PaymentDetailsRepository paymentDetailsRepository;
     private final EmiScheduleRepository emiScheduleRepository;
     private final LoanDetailsRepository loanDetailsRepository;
@@ -30,9 +31,12 @@ public class SettlementScheduler {
     private final BankClient bankClient;
     private final IsoClient isoClient;
 
-    public SettlementScheduler(PaymentDetailsRepository paymentDetailsRepository, EmiScheduleRepository emiScheduleRepository,
-                               LoanDetailsRepository loanDetailsRepository, TotalPayableRepository totalPayableRepository,
-                               BankClient bankClient, IsoClient isoClient) {
+    public SettlementScheduler(PaymentDetailsRepository paymentDetailsRepository,
+                               EmiScheduleRepository emiScheduleRepository,
+                               LoanDetailsRepository loanDetailsRepository,
+                               TotalPayableRepository totalPayableRepository,
+                               BankClient bankClient,
+                               IsoClient isoClient) {
         this.paymentDetailsRepository = paymentDetailsRepository;
         this.emiScheduleRepository = emiScheduleRepository;
         this.loanDetailsRepository = loanDetailsRepository;
@@ -43,9 +47,13 @@ public class SettlementScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void run() {
-        List<LoanDetails> loanDetails = loanDetailsRepository.findAll();
-        for (LoanDetails loanDetail : loanDetails) {
-            List<TotalPayableEntity> totalPayableEntities = totalPayableRepository.findByLoanNumber(loanDetail.getLoanNumber());
+        List<LoanDetails> loanDetailsList = loanDetailsRepository.findAll();
+        for (LoanDetails loanDetail : loanDetailsList) {
+            List<TotalPayableEntity> totalPayableEntities =
+                    totalPayableRepository.findByLoanNumber(loanDetail.getLoanNumber());
+
+            if (totalPayableEntities.isEmpty()) continue;
+
             String customerNumber = loanDetail.getCustomerNumber();
             String bankCode = loanDetail.getBankCode();
 
@@ -54,73 +62,72 @@ public class SettlementScheduler {
             bankIdAndCustomerRequest.setCustomerNumber(customerNumber);
 
             CustomerResponse customerResponse = bankClient.getCustomerByBankCodeAndCustomerNumber(bankIdAndCustomerRequest);
-            Double amountOnAccount = customerResponse.getAmount() == null ? 0.0 : customerResponse.getAmount();
+            double amountOnAccount = customerResponse.getAmount() == null ? 0.0 : customerResponse.getAmount();
 
             for (TotalPayableEntity totalPayableEntity : totalPayableEntities) {
                 LocalDate emiDate = totalPayableEntity.getEmiDate();
-                if (emiDate.isAfter(LocalDate.now())) continue;
-
-                while (emiDate.isBefore(LocalDate.now())) {
+                String status=totalPayableEntity.getStatus();
+                if (emiDate == null || emiDate.isAfter(LocalDate.now())) continue;
+                while ((emiDate.isBefore(LocalDate.now()) || emiDate.isEqual(LocalDate.now()))&& status.equals("UNPAID")) {
+                    double totalPayable = defaultZero(totalPayableEntity.getTotalPayable());
+                    if (totalPayable <= 0.0) break;
                     TransactionDetailRequest transactionDetailRequest = new TransactionDetailRequest(
                             loanDetail.getAccountNumber(),
                             "Debit",
-                            totalPayableEntity.getTotalPayable(),
-                            "loan settle for " + totalPayableEntity.getEmiDate(),
+                            totalPayable,
+                            "Loan settlement for EMI dated " + totalPayableEntity.getEmiDate(),
                             LocalDate.now()
                     );
                     SettlementRequest settlementRequest = new SettlementRequest();
                     settlementRequest.setTransactions(Collections.singletonList(transactionDetailRequest));
                     settlementRequest.setEmiMonth(totalPayableEntity.getTenure());
-                    settlementRequest.setAmount(totalPayableEntity.getTotalPayable());
+                    settlementRequest.setAmount(totalPayable);
                     settlementRequest.setLoanNumber(loanDetail.getLoanNumber());
                     settlementRequest.setAccountNumber(loanDetail.getAccountNumber());
                     isoClient.isoSettlement(settlementRequest);
-
-                    if (Math.abs(amountOnAccount - totalPayableEntity.getTotalPayable()) < 0.01) {
-                        totalPayableEntity.setPaidInterest(defaultZero(totalPayableEntity.getPaidInterest()) + totalPayableEntity.getPayableInterest());
-                        totalPayableEntity.setPaidOverdue(defaultZero(totalPayableEntity.getPaidOverdue()) + totalPayableEntity.getPayableOverdue());
-                        totalPayableEntity.setPaidLateFee(defaultZero(totalPayableEntity.getPaidLateFee()) + totalPayableEntity.getPayableLateFee());
-                        totalPayableEntity.setPaidPenalty(defaultZero(totalPayableEntity.getPaidPenalty()) + totalPayableEntity.getPayablePenalty());
-                        totalPayableEntity.setPaidPrincipal(defaultZero(totalPayableEntity.getPaidPrincipal()) + totalPayableEntity.getPayablePrincipal());
+                    if (Math.abs(amountOnAccount - totalPayable) > 0.01) {
+                        totalPayableEntity.setPaidInterest(defaultZero(totalPayableEntity.getPayableInterest()));
+                        totalPayableEntity.setPaidOverdue(defaultZero(totalPayableEntity.getPayableOverdue()));
+                        totalPayableEntity.setPaidLateFee(defaultZero(totalPayableEntity.getPayableLateFee()));
+                        totalPayableEntity.setPaidPenalty(defaultZero(totalPayableEntity.getPayablePenalty()));
+                        totalPayableEntity.setPaidPrincipal(defaultZero(totalPayableEntity.getPayablePrincipal()));
                         totalPayableEntity.setPayablePenalty(0.0);
                         totalPayableEntity.setPayableInterest(0.0);
                         totalPayableEntity.setPayableOverdue(0.0);
                         totalPayableEntity.setPayableLateFee(0.0);
                         totalPayableEntity.setPayablePrincipal(0.0);
                         totalPayableEntity.setTotalPayable(0.0);
+                        totalPayableEntity.setStatus("PAID");
                         totalPayableRepository.save(totalPayableEntity);
+                        break;
                     } else {
-                        while (amountOnAccount < totalPayableEntity.getTotalPayable()) {
-                            double remaining = amountOnAccount;
-                            remaining = applyPayment(remaining, totalPayableEntity, "lateFee");
-                            remaining = applyPayment(remaining, totalPayableEntity, "penalty");
-                            remaining = applyPayment(remaining, totalPayableEntity, "overdue");
-                            remaining = applyPayment(remaining, totalPayableEntity, "interest");
-                            remaining = applyPayment(remaining, totalPayableEntity, "principal");
-                            if (totalPayableEntity.getTotalPayable() < 0) {
-                                totalPayableEntity.setTotalPayable(0.0);
-                            }
+                        double remaining = amountOnAccount;
+                        remaining = applyPayment(remaining, totalPayableEntity, "lateFee");
+                        remaining = applyPayment(remaining, totalPayableEntity, "penalty");
+                        remaining = applyPayment(remaining, totalPayableEntity, "overdue");
+                        remaining = applyPayment(remaining, totalPayableEntity, "interest");
+                        remaining = applyPayment(remaining, totalPayableEntity, "principal");
 
-                            // When balance exhausted, adjust remaining payable
-                            if (remaining <= 0) {
-                                double newTotal = totalPayableEntity.getPayablePenalty() +
-                                        totalPayableEntity.getPayableLateFee() +
-                                        totalPayableEntity.getPayableOverdue() +
-                                        totalPayableEntity.getPayableInterest() +
-                                        totalPayableEntity.getPayablePrincipal();
-                                totalPayableEntity.setTotalPayable(Math.max(newTotal, 0.0));
-                                totalPayableRepository.save(totalPayableEntity);
-                                break;
-                            }
+                        double newTotal = defaultZero(totalPayableEntity.getPayablePenalty())
+                                + defaultZero(totalPayableEntity.getPayableLateFee())
+                                + defaultZero(totalPayableEntity.getPayableOverdue())
+                                + defaultZero(totalPayableEntity.getPayableInterest())
+                                + defaultZero(totalPayableEntity.getPayablePrincipal());
+                        totalPayableEntity.setTotalPayable(Math.max(newTotal, 0.0));
+                        totalPayableRepository.save(totalPayableEntity);
 
-                            amountOnAccount = remaining;
-                        }
+                        // Stop further deduction if amount exhausted
+                        if (remaining <= 0.0) break;
+
+                        // Update available balance for next EMI
+                        amountOnAccount = remaining;
                     }
 
-                    emiDate = emiDate.plusMonths(1); // avoid infinite loop
+                    emiDate = emiDate.plusMonths(1); // prevent infinite loop
                 }
             }
         }
+        log.info("✅ Settlement Scheduler executed successfully.");
     }
 
     private double applyPayment(double remaining, TotalPayableEntity payable, String type) {
@@ -157,18 +164,12 @@ public class SettlementScheduler {
                 double principal = Math.min(remaining, defaultZero(payable.getPayablePrincipal()));
                 payable.setPaidPrincipal(defaultZero(payable.getPaidPrincipal()) + principal);
                 payable.setPayablePrincipal(payable.getPayablePrincipal() - principal);
-                double recalculatedTotal = defaultZero(payable.getPayablePenalty())
-                        + defaultZero(payable.getPayableLateFee())
-                        + defaultZero(payable.getPayableOverdue())
-                        + defaultZero(payable.getPayableInterest())
-                        + defaultZero(payable.getPayablePrincipal());
-                payable.setTotalPayable(Math.max(recalculatedTotal, 0.0));
-
                 remaining -= principal;
                 break;
         }
         return remaining;
     }
+
     private double defaultZero(Double val) {
         return val == null ? 0.0 : val;
     }
