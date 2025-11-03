@@ -6,10 +6,7 @@ import com.rashmita.commoncommon.model.BankIdAndCustomerRequest;
 import com.rashmita.commoncommon.model.CustomerResponse;
 import com.rashmita.commoncommon.model.SettlementRequest;
 import com.rashmita.commoncommon.model.TransactionDetailRequest;
-import com.rashmita.commoncommon.repository.EmiScheduleRepository;
-import com.rashmita.commoncommon.repository.LoanDetailsRepository;
-import com.rashmita.commoncommon.repository.PaymentDetailsRepository;
-import com.rashmita.commoncommon.repository.TotalPayableRepository;
+import com.rashmita.commoncommon.repository.*;
 import com.rashmita.settlementservice.client.BankClient;
 import com.rashmita.settlementservice.client.IsoClient;
 import com.rashmita.settlementservice.service.Impl.SettlementServiceImpl;
@@ -19,11 +16,14 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class SettlementScheduler {
+
     private final PaymentDetailsRepository paymentDetailsRepository;
     private final EmiScheduleRepository emiScheduleRepository;
     private final LoanDetailsRepository loanDetailsRepository;
@@ -47,100 +47,79 @@ public class SettlementScheduler {
         this.isoClient = isoClient;
         this.settlementService = settlementService;
     }
-
     @Scheduled(fixedRate = 60000)
     public void run() {
         List<LoanDetails> loanDetailsList = loanDetailsRepository.findAll();
+
         for (LoanDetails loanDetail : loanDetailsList) {
             List<TotalPayableEntity> totalPayableEntities =
                     totalPayableRepository.findByLoanNumber(loanDetail.getLoanNumber());
             if (totalPayableEntities.isEmpty()) continue;
 
-            String customerNumber = loanDetail.getCustomerNumber();
-            String bankCode = loanDetail.getBankCode();
+            BankIdAndCustomerRequest request = new BankIdAndCustomerRequest();
+            request.setBankCode(loanDetail.getBankCode());
+            request.setCustomerNumber(loanDetail.getCustomerNumber());
+            CustomerResponse customerResponse = bankClient.getCustomerByBankCodeAndCustomerNumber(request);
+            double amountOnAccount = defaultZero(customerResponse.getAmount());
+            List<TotalPayableEntity> unpaidEmis = totalPayableEntities.stream()
+                    .filter(e -> "UNPAID".equalsIgnoreCase(e.getStatus())
+                            && e.getEmiDate() != null
+                            && !e.getEmiDate().isAfter(LocalDate.now()))
+                    .sorted(Comparator.comparing(TotalPayableEntity::getEmiDate))
+                    .collect(Collectors.toList());
 
-            BankIdAndCustomerRequest bankIdAndCustomerRequest = new BankIdAndCustomerRequest();
-            bankIdAndCustomerRequest.setBankCode(bankCode);
-            bankIdAndCustomerRequest.setCustomerNumber(customerNumber);
+            if (unpaidEmis.isEmpty()) continue;
 
-            CustomerResponse customerResponse = bankClient.getCustomerByBankCodeAndCustomerNumber(bankIdAndCustomerRequest);
-            double amountOnAccount = customerResponse.getAmount() == null ? 0.0 : customerResponse.getAmount();
+            log.info("Processing {} unpaid EMIs for loan {}", unpaidEmis.size(), loanDetail.getLoanNumber());
+            double remainingBalance = applyKnockOffPriority(amountOnAccount, unpaidEmis);
+            for (TotalPayableEntity e : unpaidEmis) {
+                double newTotal = defaultZero(e.getPayableLateFee())
+                        + defaultZero(e.getPayablePenalty())
+                        + defaultZero(e.getPayableOverdue())
+                        + defaultZero(e.getPayableInterest())
+                        + defaultZero(e.getPayablePrincipal());
+                e.setTotalPayable(newTotal);
+                if (newTotal == 0.0) e.setStatus("PAID");
+                totalPayableRepository.save(e);
+            }
 
-            for (TotalPayableEntity totalPayableEntity : totalPayableEntities) {
-                LocalDate emiDate = totalPayableEntity.getEmiDate();
-                String status = totalPayableEntity.getStatus();
+            if (remainingBalance < amountOnAccount) {
+                double settledAmount = amountOnAccount - remainingBalance;
+                TransactionDetailRequest transactionDetail = new TransactionDetailRequest(
+                        loanDetail.getAccountNumber(),
+                        "Debit",
+                        settledAmount,
+                        "Knock-off priority settlement for " + loanDetail.getLoanNumber(),
+                        LocalDate.now()
+                );
 
-                if (emiDate == null || emiDate.isAfter(LocalDate.now())) continue;
+                SettlementRequest settlementRequest = new SettlementRequest();
+                settlementRequest.setTransactions(Collections.singletonList(transactionDetail));
+                settlementRequest.setAmount(settledAmount);
+                settlementRequest.setLoanNumber(loanDetail.getLoanNumber());
+                settlementRequest.setAccountNumber(loanDetail.getAccountNumber());
 
-                if ((emiDate.isBefore(LocalDate.now()) || emiDate.isEqual(LocalDate.now())) && "UNPAID".equals(status)) {
-                    double totalPayable = defaultZero(totalPayableEntity.getTotalPayable());
-                    if (totalPayable <= 0.0) break;
-
-                    TransactionDetailRequest transactionDetailRequest = new TransactionDetailRequest(
-                            loanDetail.getAccountNumber(),
-                            "Debit",
-                            totalPayable,
-                            "Loan settlement for EMI dated " + totalPayableEntity.getEmiDate(),
-                            LocalDate.now()
-                    );
-
-                    SettlementRequest settlementRequest = new SettlementRequest();
-                    settlementRequest.setTransactions(Collections.singletonList(transactionDetailRequest));
-                    settlementRequest.setEmiMonth(totalPayableEntity.getTenure());
-                    settlementRequest.setAmount(totalPayable);
-                    settlementRequest.setLoanNumber(loanDetail.getLoanNumber());
-                    settlementRequest.setAccountNumber(loanDetail.getAccountNumber());
-                    isoClient.isoSettlement(settlementRequest);
-
-                    if (Math.abs(amountOnAccount - totalPayable) < 0.01) {
-                        totalPayableEntity.setPaidInterest(defaultZero(totalPayableEntity.getPayableInterest()));
-                        totalPayableEntity.setPaidOverdue(defaultZero(totalPayableEntity.getPayableOverdue()));
-                        totalPayableEntity.setPaidLateFee(defaultZero(totalPayableEntity.getPayableLateFee()));
-                        totalPayableEntity.setPaidPenalty(defaultZero(totalPayableEntity.getPayablePenalty()));
-                        totalPayableEntity.setPaidPrincipal(defaultZero(totalPayableEntity.getPayablePrincipal()));
-
-                        totalPayableEntity.setPayablePenalty(0.0);
-                        totalPayableEntity.setPayableInterest(0.0);
-                        totalPayableEntity.setPayableOverdue(0.0);
-                        totalPayableEntity.setPayableLateFee(0.0);
-                        totalPayableEntity.setPayablePrincipal(0.0);
-                        totalPayableEntity.setTotalPayable(0.0);
-                        totalPayableEntity.setStatus("PAID");
-                        totalPayableRepository.save(totalPayableEntity);
-                        break;
-                    } else {
-                        double remaining = amountOnAccount;
-
-                        remaining = applyPayment(remaining, totalPayableEntity, "lateFee");
-                        remaining = applyPayment(remaining, totalPayableEntity, "penalty");
-                        remaining = applyPayment(remaining, totalPayableEntity, "overdue");
-                        remaining = applyPayment(remaining, totalPayableEntity, "interest");
-                        remaining = applyPayment(remaining, totalPayableEntity, "principal");
-
-                        double newTotal =
-                                defaultZero(totalPayableEntity.getPayablePenalty()) +
-                                        defaultZero(totalPayableEntity.getPayableLateFee()) +
-                                        defaultZero(totalPayableEntity.getPayableOverdue()) +
-                                        defaultZero(totalPayableEntity.getPayableInterest()) +
-                                        defaultZero(totalPayableEntity.getPayablePrincipal());
-
-                        totalPayableEntity.setTotalPayable(Math.max(newTotal, 0.0));
-
-                        if (totalPayableEntity.getTotalPayable() == 0.0) {
-                            totalPayableEntity.setStatus("PAID");
-                        }
-
-                        totalPayableRepository.save(totalPayableEntity);
-
-                        if (remaining <= 0.0) break;
-                        amountOnAccount = remaining;
-                    }
-                }
+                isoClient.isoSettlement(settlementRequest);
             }
         }
-        log.info("Settlement Scheduler executed successfully.");
-    }
 
+        log.info("Settlement Scheduler executed successfully with global knock-off priority.");
+    }
+    private double applyKnockOffPriority(double balance, List<TotalPayableEntity> unpaidEmis) {
+        balance = settleType(balance, unpaidEmis, "lateFee");
+        balance = settleType(balance, unpaidEmis, "penalty");
+        balance = settleType(balance, unpaidEmis, "overdue");
+        balance = settleType(balance, unpaidEmis, "interest");
+        balance = settleType(balance, unpaidEmis, "principal");
+        return balance;
+    }
+    private double settleType(double remaining, List<TotalPayableEntity> emis, String type) {
+        for (TotalPayableEntity e : emis) {
+            if (remaining <= 0) break;
+            remaining = applyPayment(remaining, e, type);
+        }
+        return remaining;
+    }
     private double applyPayment(double remaining, TotalPayableEntity payable, String type) {
         double payableAmt;
         double paidAmt;
@@ -153,23 +132,20 @@ public class SettlementScheduler {
                 payable.setPayableLateFee(payableAmt - paidAmt);
                 remaining -= paidAmt;
                 break;
-
             case "penalty":
                 payableAmt = defaultZero(payable.getPayablePenalty());
                 paidAmt = Math.min(remaining, payableAmt);
-                payable.setPaidPenalty(paidAmt);
+                payable.setPaidPenalty( paidAmt);
                 payable.setPayablePenalty(payableAmt - paidAmt);
                 remaining -= paidAmt;
                 break;
-
             case "overdue":
                 payableAmt = defaultZero(payable.getPayableOverdue());
                 paidAmt = Math.min(remaining, payableAmt);
-                payable.setPaidOverdue(paidAmt);
+                payable.setPaidOverdue( paidAmt);
                 payable.setPayableOverdue(payableAmt - paidAmt);
                 remaining -= paidAmt;
                 break;
-
             case "interest":
                 payableAmt = defaultZero(payable.getPayableInterest());
                 paidAmt = Math.min(remaining, payableAmt);
@@ -177,7 +153,6 @@ public class SettlementScheduler {
                 payable.setPayableInterest(payableAmt - paidAmt);
                 remaining -= paidAmt;
                 break;
-
             case "principal":
                 payableAmt = defaultZero(payable.getPayablePrincipal());
                 paidAmt = Math.min(remaining, payableAmt);

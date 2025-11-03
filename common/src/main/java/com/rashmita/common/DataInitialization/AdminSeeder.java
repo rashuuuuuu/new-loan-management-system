@@ -121,7 +121,7 @@ public class AdminSeeder {
             saveAdmin(adminDto);
         });
 
-        log.info("✅ Super Admin(s) persisted successfully without duplicates.");
+        log.info("Super Admin(s) persisted successfully without duplicates.");
     }
 
     private void saveAdmin(SuperAdminDto adminDto) {
@@ -139,6 +139,6 @@ public class AdminSeeder {
         admin.setStatus(status);
 
         adminRepository.save(admin);
-        log.info("✅ Admin '{}' created.", adminDto.getEmail());
+        log.info(" Admin '{}' created.", adminDto.getEmail());
     }
 }

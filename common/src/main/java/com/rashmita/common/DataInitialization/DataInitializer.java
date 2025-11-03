@@ -50,7 +50,7 @@ public class DataInitializer {
                 statusRepository.save(status);
             }
         }
-        log.info("✅ Status populated without duplicates.");
+        log.info(" Status populated without duplicates.");
     }
 
     private void populateRoles() {
@@ -64,7 +64,7 @@ public class DataInitializer {
                 roleRepository.save(role);
             }
         }
-        log.info("✅ Roles populated without duplicates.");
+        log.info(" Roles populated without duplicates.");
     }
 
     private void populateAccessGroupTypes() {
@@ -76,7 +76,7 @@ public class DataInitializer {
                 accessGroupTypeRepository.save(type);
             }
         }
-        log.info("✅ AccessGroupType populated without duplicates.");
+        log.info(" AccessGroupType populated without duplicates.");
     }
 
     private void populateAccessGroup() {
@@ -101,7 +101,7 @@ public class DataInitializer {
                 accessGroupRepository.save(group);
             }
         }
-        log.info("✅ AccessGroup populated without duplicates.");
+        log.info(" AccessGroup populated without duplicates.");
     }
 
     private void populateAccessGroupTypeRoleMap() {
@@ -127,6 +127,6 @@ public class DataInitializer {
                 accessGroupTypeRoleMapRepository.save(map);
             }
         }
-        log.info("✅ AccessGroupTypeRoleMap populated without duplicates.");
+        log.info(" AccessGroupTypeRoleMap populated without duplicates.");
     }
 }
