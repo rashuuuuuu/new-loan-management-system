@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,7 +107,42 @@ public class TotalPayableImpl implements TotalPayable {
                 .mapToDouble(EmiInterest::getInterestAmount)
                 .sum();
     }
+    private double calculateTotalLateFeeByUnPaidStatus(String loanNumber){
+        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+        return totalPayableEntities.stream()
+                .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
+                .mapToDouble(TotalPayableEntity::getPayableLateFee)
+                .sum();
+    }
+    private double calculateTotalInterestByUnpaidStatus(String loanNumber){
+        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+        return totalPayableEntities.stream()
+                .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
+                .mapToDouble(TotalPayableEntity::getPayableInterest)
+                .sum();
+    }
+    private double calculateTotalOverdueByLoanNumber(String loanNumber){
+        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+        return totalPayableEntities.stream()
+                .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
+                .mapToDouble(TotalPayableEntity::getPayableOverdue)
+                .sum();
+    }
 
+    private double calculateTotalPenaltyByLoanNumber(String loanNumber){
+        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+        return totalPayableEntities.stream()
+                .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
+                .mapToDouble(TotalPayableEntity::getPayablePenalty)
+                .sum();
+    }
+    private double calculateTotalPrincipalByLoanNumber(String loanNumber){
+        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+        return totalPayableEntities.stream()
+                .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
+                .mapToDouble(TotalPayableEntity::getPayablePrincipal)
+                .sum();
+    }
 
     public double calculateUnpaidEmiAmount(String loanNumber) {
         return emiScheduleRepository.findByLoanNumber(loanNumber)
@@ -315,7 +351,6 @@ public class TotalPayableImpl implements TotalPayable {
         log.info("total payable updated successfully");
         totalPayableRepository.saveAll(totalPayables);
     }
-
 
     public String totalPayablePerMonth(LoanNumberModel loanNumber) {
         List<EmiSchedule> emiScheduleList = emiScheduleRepository.findByLoanNumber(loanNumber.getLoanNumber());

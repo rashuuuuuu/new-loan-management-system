@@ -10,7 +10,6 @@ CREATE TABLE foneloan_limit (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     bank_code varchar(20) NOT NULL,
-    -- Prevent duplicate tenure rows for same customer
     UNIQUE (account_number, emi_month)
 );
 
