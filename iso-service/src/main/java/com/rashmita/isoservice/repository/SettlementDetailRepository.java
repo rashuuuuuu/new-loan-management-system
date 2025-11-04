@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SettlementDetailRepository extends JpaRepository<SettlementDetail, Long> {
-    boolean existsByTransactionId(String transactionId);
 }

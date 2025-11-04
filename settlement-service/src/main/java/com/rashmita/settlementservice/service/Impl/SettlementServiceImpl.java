@@ -25,8 +25,6 @@ public class SettlementServiceImpl implements SettlementService {
     public void createSettlement(SettlementRequest request) {
         SettlementRequest settlementRequest = new SettlementRequest();
         settlementRequest.setLoanNumber(request.getLoanNumber());
-        settlementRequest.setTransactionId(request.getTransactionId());
-        settlementRequest.setTransactionId(request.getTransactionId());
         settlementRequest.setAccountNumber(request.getAccountNumber());
         settlementRequest.setAmount(request.getAmount());
         settlementRequest.setEmiMonth(request.getEmiMonth());

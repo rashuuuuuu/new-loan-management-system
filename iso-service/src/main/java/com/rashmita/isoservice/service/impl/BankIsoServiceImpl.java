@@ -1,7 +1,9 @@
 package com.rashmita.isoservice.service.impl;
 
+import com.rashmita.commoncommon.entity.AmountUpdateRequest;
 import com.rashmita.commoncommon.model.SettlementRequest;
 import com.rashmita.commoncommon.model.TransactionRequest;
+import com.rashmita.isoservice.client.BankClient;
 import com.rashmita.isoservice.entity.BankMoney;
 import com.rashmita.isoservice.entity.SettlementDetail;
 import com.rashmita.isoservice.entity.TransactionDetail;
@@ -26,6 +28,7 @@ public class BankIsoServiceImpl implements BankIsoService {
     private final TransactionDetailRepository transactionDetailRepository;
     private final BankMoneyRepository bankMoneyRepository;
     private final SettlementDetailRepository settlementDetailRepository;
+    private final BankClient bankClient;
 
     @Override
     @Transactional
@@ -43,6 +46,7 @@ public class BankIsoServiceImpl implements BankIsoService {
             detail.setTransactionId(request.getTransactionId());
             detail.setFromAccount(fromAccount);
             detail.setAccountNumber(t.getAccountNumber());
+            detail.setType(t.getType());
             detail.setTransferAmount(amount);
             detail.setParticularRemarks(t.getParticularRemarks());
             detail.setValueDate(t.getValueDate());
@@ -73,12 +77,12 @@ public class BankIsoServiceImpl implements BankIsoService {
             totalTransfer = totalTransfer.add(amount);
             SettlementDetail detail = new SettlementDetail();
             detail.setLoanNumber(request.getLoanNumber());
-            detail.setTransactionId(request.getTransactionId());
             detail.setToAccount(toAccount);
             detail.setAccountNumber(t.getAccountNumber());
             detail.setTransferAmount(amount);
             detail.setParticularRemarks(t.getParticularRemarks());
             detail.setValueDate(t.getValueDate());
+            detail.setType(t.getType());
             detail.setTotalAmount(amount);
             detail.setStatus("Success");
             detail.setEmiMonth(request.getEmiMonth());
@@ -90,6 +94,11 @@ public class BankIsoServiceImpl implements BankIsoService {
         }
         bankAccount.setTransferAmount(totalTransfer);
         bankAccount.setTotalBalance(currentBalance.add(totalTransfer));
+        String accountNumber=request.getAccountNumber();
+        AmountUpdateRequest amountUpdateRequest=new AmountUpdateRequest();
+        amountUpdateRequest.setAccountNumber(accountNumber);
+        amountUpdateRequest.setAmount(request.getAmount());
+        bankClient.updateAmountByCustomerNumber(amountUpdateRequest);
         bankMoneyRepository.save(bankAccount);
         settlementDetailRepository.saveAll(settlementDetails);
         log.info(" Successfully Settled {} transactions. Total transferred: {} from account {}",
@@ -111,6 +120,7 @@ public class BankIsoServiceImpl implements BankIsoService {
             detail.setTransactionId(request.getTransactionId());
             detail.setToAccount(toAccount);
             detail.setAccountNumber(t.getAccountNumber());
+            detail.setType(t.getType());
             detail.setTransferAmount(amount);
             detail.setParticularRemarks(t.getParticularRemarks());
             detail.setValueDate(t.getValueDate());

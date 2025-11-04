@@ -56,6 +56,11 @@ public class CustomerController {
     public CustomerResponse getCustomerByBankCodeAndCustomerNumber(@Valid @RequestBody BankIdAndCustomerRequest bankIdAndCustomerRequest) throws NotFoundException {
         return customerService.getCustomerByBankCodeAndCustomerNumber(bankIdAndCustomerRequest);
     }
+    
+    @PostMapping("/update/by/customernumber")
+    public ServerResponse<?> updateAmountByCustomerNumber(@Valid @RequestBody AmountUpdateRequest amountUpdateRequest) {
+        return customerService.updateAmountByCustomerNumber(amountUpdateRequest);
+    }
 
     @GetMapping(GET + ALL)
     public ServerResponse<?> getAllCustomers(

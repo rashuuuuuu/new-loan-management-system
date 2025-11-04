@@ -21,12 +21,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SettlementDetail extends AbstractEntity {
     private String loanNumber;
-    private String transactionId;
     private String accountNumber;
     private String toAccount;
     private int emiMonth;
-    @Enumerated(EnumType.STRING)
-    private TransactionType type;
+    private String type;
     private BigDecimal totalAmount;
     private BigDecimal transferAmount;
     private String particularRemarks;

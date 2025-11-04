@@ -107,37 +107,41 @@ public class TotalPayableImpl implements TotalPayable {
                 .mapToDouble(EmiInterest::getInterestAmount)
                 .sum();
     }
-    private double calculateTotalLateFeeByUnPaidStatus(String loanNumber){
-        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+
+    private double calculateTotalLateFeeByUnPaidStatus(String loanNumber) {
+        List<TotalPayableEntity> totalPayableEntities = totalPayableRepository.findByLoanNumber(loanNumber);
         return totalPayableEntities.stream()
                 .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
                 .mapToDouble(TotalPayableEntity::getPayableLateFee)
                 .sum();
     }
-    private double calculateTotalInterestByUnpaidStatus(String loanNumber){
-        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+
+    private double calculateTotalInterestByUnpaidStatus(String loanNumber) {
+        List<TotalPayableEntity> totalPayableEntities = totalPayableRepository.findByLoanNumber(loanNumber);
         return totalPayableEntities.stream()
                 .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
                 .mapToDouble(TotalPayableEntity::getPayableInterest)
                 .sum();
     }
-    private double calculateTotalOverdueByLoanNumber(String loanNumber){
-        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+
+    private double calculateTotalOverdueByLoanNumber(String loanNumber) {
+        List<TotalPayableEntity> totalPayableEntities = totalPayableRepository.findByLoanNumber(loanNumber);
         return totalPayableEntities.stream()
                 .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
                 .mapToDouble(TotalPayableEntity::getPayableOverdue)
                 .sum();
     }
 
-    private double calculateTotalPenaltyByLoanNumber(String loanNumber){
-        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+    private double calculateTotalPenaltyByLoanNumber(String loanNumber) {
+        List<TotalPayableEntity> totalPayableEntities = totalPayableRepository.findByLoanNumber(loanNumber);
         return totalPayableEntities.stream()
                 .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
                 .mapToDouble(TotalPayableEntity::getPayablePenalty)
                 .sum();
     }
-    private double calculateTotalPrincipalByLoanNumber(String loanNumber){
-        List<TotalPayableEntity> totalPayableEntities=totalPayableRepository.findByLoanNumber(loanNumber);
+
+    private double calculateTotalPrincipalByLoanNumber(String loanNumber) {
+        List<TotalPayableEntity> totalPayableEntities = totalPayableRepository.findByLoanNumber(loanNumber);
         return totalPayableEntities.stream()
                 .filter(totalPayableEntity -> totalPayableEntity.getStatus().equals("UNPAID"))
                 .mapToDouble(TotalPayableEntity::getPayablePrincipal)

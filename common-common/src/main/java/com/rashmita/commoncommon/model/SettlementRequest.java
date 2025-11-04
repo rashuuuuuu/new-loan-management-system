@@ -14,7 +14,6 @@ public class SettlementRequest {
     private String loanNumber;
     private String accountNumber;
     private Double amount;
-    private String transactionId;
     private int emiMonth;
     private List<TransactionDetailRequest> transactions;
 }

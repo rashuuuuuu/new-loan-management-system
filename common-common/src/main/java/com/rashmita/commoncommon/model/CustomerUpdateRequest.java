@@ -1,4 +1,4 @@
-package com.rashmita.bankservice.model;
+package com.rashmita.commoncommon.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,4 +13,7 @@ public class CustomerUpdateRequest {
     private String firstName;
     private String lastName;
     private String gender;
+    private String amount;
+    private String customerNumber;
+
 }

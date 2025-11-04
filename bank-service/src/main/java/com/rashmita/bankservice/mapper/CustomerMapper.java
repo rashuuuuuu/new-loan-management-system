@@ -1,9 +1,6 @@
 package com.rashmita.bankservice.mapper;
 
-import com.rashmita.bankservice.model.CustomerIdRequest;
-import com.rashmita.bankservice.model.CustomerRequest;
-import com.rashmita.bankservice.model.CustomerResponse;
-import com.rashmita.bankservice.model.CustomerUpdateRequest;
+import com.rashmita.bankservice.model.*;
 import com.rashmita.bankservice.repository.CustomerRepository;
 import com.rashmita.common.constants.StatusConstants;
 import com.rashmita.common.entity.Customer;
@@ -50,9 +47,7 @@ public class CustomerMapper {
         customer.setStatus(statusRepository.getStatusByName(StatusConstants.CREATED.getName()));
         return customerRepository.save(customer);
     }
-
     public Customer updateCustomerDetails(CustomerUpdateRequest customerUpdateRequest) {
-
         String email = customerUpdateRequest.getEmail();
         Customer customer = customerRepository.getByEmail(email);
         if (customerUpdateRequest.getEmail() != null) {
@@ -112,4 +107,22 @@ public class CustomerMapper {
             System.out.println("Only blocked Customer can be unblocked");
         }
     }
+    public Customer updateAmountByCustomerNumber(AmountUpdateRequest request) {
+        return customerRepository.getByAccountNumber(request.getAccountNumber())
+                .map(customer -> {
+                    double currentAmount = safeParseDouble(customer.getAmount());
+                    double paid = safeParseDouble(request.getAmount());
+                    customer.setAmount(String.valueOf(currentAmount - paid));
+                    log.info("amount deduct  from customer account {}", customer.getAccountNumber());
+                    return customerRepository.save(customer);
+                })
+                .orElseThrow(() -> new RuntimeException("Customer not found for account: " + request.getAccountNumber()));
+    }
+    private double safeParseDouble(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return 0.0;
+        }
+        return Double.parseDouble(value);
+    }
+
 }

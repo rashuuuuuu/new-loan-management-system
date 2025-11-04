@@ -14,5 +14,5 @@ public interface CustomerService {
     ServerResponse blockCustomer(CustomerIdRequest customerIdRequest);
     ServerResponse unblockCustomer(CustomerIdRequest customerIdRequest);
     CustomerResponse getCustomerByBankCodeAndCustomerNumber(BankIdAndCustomerRequest bankIdAndCustomerRequest);
-
+    ServerResponse updateAmountByCustomerNumber(AmountUpdateRequest amountUpdateRequest);
 }

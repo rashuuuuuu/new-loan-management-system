@@ -26,8 +26,7 @@ public class TransactionDetail extends AbstractEntity {
     private String accountNumber;
     private String fromAccount;
     private String toAccount;
-    @Enumerated(EnumType.STRING)
-    private TransactionType type;
+    private String type;
     private BigDecimal totalAmount;
     private BigDecimal transferAmount;
     private String particularRemarks;

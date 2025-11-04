@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -29,28 +30,29 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerRepository customerRepository;
     @Autowired
     private ModelMapper modelMapper;
+
     @Override
     public ServerResponse<?> createCustomer(CustomerRequest customerRequestDto) {
-       Customer customer=customerMapper.saveCustomerDetails(customerRequestDto);
-        return ResponseUtility.getSuccessfulServerResponse("successful registration with this account number",customer.getAccountNumber());
+        Customer customer = customerMapper.saveCustomerDetails(customerRequestDto);
+        return ResponseUtility.getSuccessfulServerResponse("successful registration with this account number", customer.getAccountNumber());
     }
 
     @Override
     public ServerResponse<?> updateCustomer(CustomerUpdateRequest customerUpdateRequest) {
-       customerMapper.updateCustomerDetails(customerUpdateRequest);
-       return ResponseUtility.getSuccessfulServerResponse("Customer Updated Successfully");
+        customerMapper.updateCustomerDetails(customerUpdateRequest);
+        return ResponseUtility.getSuccessfulServerResponse("Customer Updated Successfully");
     }
 
     @Override
     public ServerResponse<?> deleteCustomer(CustomerIdRequest customerIdRequest) {
-      customerMapper.deleteCustomer(customerIdRequest);
-      return ResponseUtility.getSuccessfulServerResponse("Customer Deleted Successfully");
+        customerMapper.deleteCustomer(customerIdRequest);
+        return ResponseUtility.getSuccessfulServerResponse("Customer Deleted Successfully");
     }
 
     @Override
     public ServerResponse<?> getCustomerById(CustomerIdRequest customerIdRequest) throws NotFoundException {
-    customerMapper.getDetailsById(customerIdRequest);
-    return  ResponseUtility.getSuccessfulServerResponse("Customer Details fetched Successfully");
+        customerMapper.getDetailsById(customerIdRequest);
+        return ResponseUtility.getSuccessfulServerResponse("Customer Details fetched Successfully");
     }
 
     @Override
@@ -92,6 +94,12 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 //        log.info("Found customer: {}", customer);
         return modelMapper.map(customer, CustomerResponse.class);
+    }
+
+    @Override
+    public ServerResponse<?> updateAmountByCustomerNumber(AmountUpdateRequest amountUpdateRequest) {
+        customerMapper.updateAmountByCustomerNumber(amountUpdateRequest);
+        return ResponseUtility.getSuccessfulServerResponse("Customer Updated Successfully");
     }
 }
 

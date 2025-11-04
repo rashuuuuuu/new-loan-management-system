@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TotalPayableEntity extends AbstractEntity{
+public class TotalPayableEntity extends AbstractEntity {
     private int tenure;
     private String status;
     private LocalDate emiDate;
