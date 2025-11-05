@@ -28,6 +28,8 @@ public class EmiSchedule extends AbstractEntity {
     private Double principalComponent;
     private Double interestComponent;
     private Double paidAmount;
+    private Double unpaidAmount;
+    private Double beginningBalance;
     private LocalDateTime paidDate;
     private String status;
     private Boolean lastInstallment;

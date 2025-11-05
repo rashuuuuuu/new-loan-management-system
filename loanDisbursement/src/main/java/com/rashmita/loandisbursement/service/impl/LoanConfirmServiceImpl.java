@@ -98,26 +98,24 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         LocalDate emiStartDate = LocalDate.parse(request.getEmiStartDate()); // from request
         LocalDate emiDate = LocalDate.parse(request.getEmiDate());           // from request
         double remainingPrincipal = principal;
+        double beginningBalance=principal;
         double monthlyInterestRate = annualInterestRate / 1200;
-
         for (int i = 1; i <= tenureMonths; i++) {
             LocalDate currentEmiStartDate = (i == 1) ? emiStartDate : emiStartDate.plusMonths(i - 1);
             LocalDate currentEmiDate = (i == 1) ? emiDate : emiDate.plusMonths(i - 1);
-
             double interestComponent = remainingPrincipal * monthlyInterestRate;
             double principalComponent = emi - interestComponent;
             remainingPrincipal -= principalComponent;
-
-            // Adjust last installment
+            double currentBeginningBalance = (i == 1) ? principal : beginningBalance;
             if (i == tenureMonths && remainingPrincipal != 0) {
                 principalComponent += remainingPrincipal;
                 remainingPrincipal = 0;
             }
-            // Save EMI schedule
             EmiSchedule emiEntity = new EmiSchedule();
             emiEntity.setLoanNumber(loanDetail.getLoanNumber());
             emiEntity.setLoanAmount(principal);
             emiEntity.setEmiMonth(i);
+            emiEntity.setBeginningBalance(currentBeginningBalance);
             emiEntity.setEmiAmount(round(emi));
             emiEntity.setPrincipalComponent(round(principalComponent));
             emiEntity.setInterestComponent(round(interestComponent));
@@ -127,8 +125,6 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
             emiEntity.setStatus("PENDING");
             if (i == tenureMonths) emiEntity.setLastInstallment(true);
             emiEntities.add(emiEntity);
-
-            // Response DTO
             LoanConfirmResponse.EmiScheduleResponse emiResp = new LoanConfirmResponse.EmiScheduleResponse();
             emiResp.setEmiMonth(i);
             emiResp.setEmiAmount(round(emi));
@@ -138,11 +134,10 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
             emiResp.setInterestComponent(round(interestComponent));
             emiResp.setRemainingAmount(round(remainingPrincipal));
             emiScheduleResponses.add(emiResp);
+            beginningBalance=remainingPrincipal;
         }
-
         emiScheduleRepository.saveAll(emiEntities);
 
-        // Trigger ISO transaction
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setLoanNumber(loanDetail.getLoanNumber());
         transactionRequest.setTransactionId(loanDetail.getTransaction_token());
@@ -156,11 +151,9 @@ public class LoanConfirmServiceImpl implements LoanConfirmService {
         transactionRequest.setTransactions(Collections.singletonList(transaction));
         isoClient.processMultiTransaction(transactionRequest);
 
-        // Update Redis cache
         loanBookResponse.setStatus("Confirmed");
         redisTemplate.opsForValue().set(cacheKey, loanBookResponse, 10, TimeUnit.MINUTES);
 
-        // Build response
         LoanConfirmResponse response = new LoanConfirmResponse();
         response.setLoanNumber(loanNumber);
         response.setStatus("Confirmed");

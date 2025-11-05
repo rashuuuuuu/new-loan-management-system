@@ -20,7 +20,7 @@ public class TotalPayableEntity extends AbstractEntity {
     private Double payablePrincipal;
     private Double paidPrincipal;
     private Double payableInterest;
-    private Double paidInterest;
+    private Double paidInterest=0D;
     private Double payablePenalty;
     private Double paidPenalty;
     private Double payableOverdue;

@@ -94,8 +94,8 @@ public class BankIsoServiceImpl implements BankIsoService {
         }
         bankAccount.setTransferAmount(totalTransfer);
         bankAccount.setTotalBalance(currentBalance.add(totalTransfer));
-        String accountNumber=request.getAccountNumber();
-        AmountUpdateRequest amountUpdateRequest=new AmountUpdateRequest();
+        String accountNumber = request.getAccountNumber();
+        AmountUpdateRequest amountUpdateRequest = new AmountUpdateRequest();
         amountUpdateRequest.setAccountNumber(accountNumber);
         amountUpdateRequest.setAmount(request.getAmount());
         bankClient.updateAmountByCustomerNumber(amountUpdateRequest);
@@ -104,7 +104,6 @@ public class BankIsoServiceImpl implements BankIsoService {
         log.info(" Successfully Settled {} transactions. Total transferred: {} from account {}",
                 settlementDetails.size(), totalTransfer, request.getAccountNumber());
     }
-
     public void isoPrepayment(TransactionRequest request) {
         String toAccount = "ACC10001";
         BankMoney bankAccount = bankMoneyRepository.findByAccountNumber(toAccount)

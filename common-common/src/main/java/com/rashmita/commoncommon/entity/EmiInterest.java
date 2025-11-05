@@ -6,7 +6,12 @@ import java.time.LocalDate;
 
 
 @Entity
-@Table(name = "emi_interest")
+@Table(
+        name = "emi_interest",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"loan_number", "accrual_date", "emi_month"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor

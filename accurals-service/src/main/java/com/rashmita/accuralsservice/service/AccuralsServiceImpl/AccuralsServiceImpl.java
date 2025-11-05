@@ -2,6 +2,7 @@ package com.rashmita.accuralsservice.service.AccuralsServiceImpl;
 import com.rashmita.accuralsservice.service.AccuralsService;
 import com.rashmita.commoncommon.entity.*;
 import com.rashmita.commoncommon.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -29,18 +30,24 @@ public class AccuralsServiceImpl implements AccuralsService {
         this.emiLateFeeRepository = emiLateFeeRepository;
     }
 
+    @Transactional
     @Override
     public void saveInterest(String loanNumber, Long emiId, LocalDate today, double dailyInterest, int emiMonth) {
-        EmiInterest emiInterest=emiInterestRepository.findByLoanNumberAndAccrualDateAndEmiMonth(loanNumber,today,emiMonth)
-                .orElse(new EmiInterest());
-        emiInterest.setAccrualDate(today);
+        EmiInterest emiInterest = emiInterestRepository
+                .findByLoanNumberAndAccrualDateAndEmiMonth(loanNumber, today, emiMonth)
+                .orElseGet(() -> {
+                    EmiInterest e = new EmiInterest();
+                    e.setLoanNumber(loanNumber);
+                    e.setAccrualDate(today);
+                    e.setEmiMonth(emiMonth);
+                    return e;
+                });
         emiInterest.setInterestAmount(dailyInterest);
-        emiInterest.setLoanNumber(loanNumber);
         emiInterest.setEmiId(emiId);
-        emiInterest.setEmiMonth(emiMonth);
-        emiInterestRepository.save(emiInterest);
+        emiInterestRepository.saveAndFlush(emiInterest);
         log.info("Interest recorded for loan {} (EMI {}) on {}: {}", loanNumber, emiId, today, dailyInterest);
     }
+
 
     @Override
     public void savePenalty(String loanNumber, Long emiId, LocalDate today, double penaltyInterest, int emiMonth) {

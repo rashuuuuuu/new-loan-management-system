@@ -30,6 +30,7 @@ public class SettlementScheduler {
     private final IsoClient isoClient;
     private final SettlementServiceImpl settlementService;
     private final ConcurrentHashMap<String, LocalDate> lastSettlementMap = new ConcurrentHashMap<>();
+
     public SettlementScheduler(PaymentDetailsRepository paymentDetailsRepository,
                                EmiScheduleRepository emiScheduleRepository,
                                LoanDetailsRepository loanDetailsRepository,
@@ -99,8 +100,6 @@ public class SettlementScheduler {
                         e.setStatus("PAID");
                         totalPayableRepository.save(e);
                     });
-
-                    loanDetail.setStatus("PAID");
                     loanDetailsRepository.save(loanDetail);
 
                     log.info("Loan {} FULLY SETTLED — extra balance remaining: {}", loanDetail.getLoanNumber(), remainingBalance);
@@ -114,13 +113,11 @@ public class SettlementScheduler {
                                 "Full settlement for loan " + loanDetail.getLoanNumber(),
                                 LocalDate.now()
                         );
-
                         SettlementRequest settlementRequest = new SettlementRequest();
                         settlementRequest.setTransactions(Collections.singletonList(transactionDetail));
                         settlementRequest.setAmount(amountOnAccount - remainingBalance);
                         settlementRequest.setLoanNumber(loanDetail.getLoanNumber());
                         settlementRequest.setAccountNumber(loanDetail.getAccountNumber());
-
                         isoClient.isoSettlement(settlementRequest);
                         lastSettlementMap.put(loanDetail.getLoanNumber(), today);
 
@@ -155,13 +152,11 @@ public class SettlementScheduler {
                                 "Knock-off priority settlement for " + loanDetail.getLoanNumber(),
                                 LocalDate.now()
                         );
-
                         SettlementRequest settlementRequest = new SettlementRequest();
                         settlementRequest.setTransactions(Collections.singletonList(transactionDetail));
                         settlementRequest.setAmount(settledAmount);
                         settlementRequest.setLoanNumber(loanDetail.getLoanNumber());
                         settlementRequest.setAccountNumber(loanDetail.getAccountNumber());
-
                         isoClient.isoSettlement(settlementRequest);
                         lastSettlementMap.put(loanDetail.getLoanNumber(), today);
 
@@ -178,7 +173,7 @@ public class SettlementScheduler {
             }
         }
 
-        log.info(" Settlement Scheduler executed successfully with global knock-off and full-payment ISO integration.");
+        log.info(" Settlement Scheduler executed successfully.");
     }
 
     private double applyKnockOffPriority(double balance, List<TotalPayableEntity> unpaidEmis) {
@@ -227,7 +222,11 @@ public class SettlementScheduler {
                 payableAmt = defaultZero(payable.getPayableInterest());
                 paidAmt = Math.min(remaining, payableAmt);
                 payable.setPaidInterest(paidAmt);
-                payable.setPayableInterest(payableAmt - paidAmt);
+                if(payable.getPaidInterest()>0D){
+                    payable.setPayableInterest(0D);
+                }else{
+                    payable.setPayableInterest(payableAmt - paidAmt);
+                }
                 remaining -= paidAmt;
                 break;
             case "principal":
